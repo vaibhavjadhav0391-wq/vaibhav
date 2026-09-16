@@ -1,0 +1,157 @@
+/* ── Google Fonts ─────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300;1,9..144,400&family=Inter:wght@300;400;500;600&display=swap');
+
+@import "tailwindcss";
+
+/* ── Design Tokens (dark default) ─────────────── */
+:root {
+  --background: #0A0A0B;
+  --foreground: #EDEDEC;
+  --muted-foreground: rgba(237,237,236,.44);
+  --border: rgba(237,237,236,.10);
+  --accent: #8FA6FF;
+  --accent-foreground: #0A0A0B;
+  --card: #111113;
+  --font-serif: 'Fraunces', Georgia, serif;
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --ease: cubic-bezier(.22,.1,.36,1);
+}
+
+.dark {
+  --background: #0A0A0B;
+  --foreground: #EDEDEC;
+  --muted-foreground: rgba(237,237,236,.44);
+  --border: rgba(237,237,236,.10);
+  --accent: #8FA6FF;
+  --accent-foreground: #0A0A0B;
+  --card: #111113;
+}
+
+.light {
+  --background: #F5F5F3;
+  --foreground: #0A0A0B;
+  --muted-foreground: rgba(10,10,11,.46);
+  --border: rgba(10,10,11,.12);
+  --accent: #4B6BFF;
+  --accent-foreground: #ffffff;
+  --card: #EBEBEA;
+}
+
+/* ── Base ────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  scroll-behavior: smooth;
+  font-family: var(--font-sans);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  font-weight: 400;
+  line-height: 1.65;
+  overflow-x: hidden;
+  transition: background 0.35s var(--ease), color 0.35s var(--ease);
+}
+
+a { color: inherit; text-decoration: none; }
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+/* ── Tailwind CSS variable bridge ─────────────── */
+@layer base {
+  :root {
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+    --color-border: var(--border);
+    --color-accent: var(--accent);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-card: var(--card);
+  }
+}
+
+/* ── Typography ───────────────────────────────── */
+.font-serif { font-family: var(--font-serif) !important; }
+
+/* ── Section helpers ─────────────────────────── */
+.section-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.9rem;
+}
+.section-heading {
+  font-family: var(--font-serif);
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 400;
+  line-height: 1.2;
+  margin-bottom: 3.2rem;
+}
+
+/* ── Reveal animation ────────────────────────── */
+.reveal {
+  opacity: 0;
+  transform: translateY(32px);
+  transition: opacity 0.72s var(--ease), transform 0.72s var(--ease);
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.delay-100 { transition-delay: 0.1s; }
+.delay-200 { transition-delay: 0.2s; }
+.delay-300 { transition-delay: 0.32s; }
+.delay-400 { transition-delay: 0.44s; }
+
+/* ── Hero glow (mouse-follow) ────────────────── */
+.hero-glow::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    600px circle at var(--mx, 50%) var(--my, 44%),
+    rgba(143,166,255,.18) 0%,
+    transparent 70%
+  );
+  z-index: 0;
+}
+.light .hero-glow::before,
+[data-theme="light"] .hero-glow::before {
+  background: radial-gradient(
+    600px circle at var(--mx, 50%) var(--my, 44%),
+    rgba(75,107,255,.12) 0%,
+    transparent 70%
+  );
+}
+.hero-glow > * { position: relative; z-index: 1; }
+
+/* ── Animations ──────────────────────────────── */
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.7); }
+}
+.animate-pulse-dot { animation: pulse-dot 2s ease-in-out infinite; }
+
+@keyframes bob {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50% { transform: translateX(-50%) translateY(6px); }
+}
+.animate-bob { animation: bob 2.2s ease-in-out infinite; }
+
+/* ── Utility classes mapped to CSS vars ───────── */
+.bg-background { background-color: var(--background); }
+.bg-card { background-color: var(--card); }
+.text-foreground { color: var(--foreground); }
+.text-muted-foreground { color: var(--muted-foreground); }
+.text-accent { color: var(--accent); }
+.border-border { border-color: var(--border); }
+.border-accent { border-color: var(--accent); }
+.bg-accent { background-color: var(--accent); }
+.bg-accent\/10 { background-color: color-mix(in srgb, var(--accent) 10%, transparent); }
+.decoration-accent { text-decoration-color: var(--accent); }
+.bg-background\/40 { background-color: color-mix(in srgb, var(--background) 40%, transparent); }
