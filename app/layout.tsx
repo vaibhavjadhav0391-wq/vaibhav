@@ -11,13 +11,13 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body>
+    <html lang="en" suppressHydrationWarning className="light">
+      <body className="bg-background text-foreground transition-colors duration-300">
         <ThemeProvider
-          attribute="data-theme"
-          defaultTheme="dark"
+          attribute="class"
+          defaultTheme="light"
           enableSystem={false}
-          storageKey="vj-theme"
+          storageKey="vj-portfolio-theme"
         >
           {children}
           <ScrollReveal />

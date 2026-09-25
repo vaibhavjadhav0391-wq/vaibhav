@@ -10,7 +10,7 @@ export default function Home() {
   return (
     <>
       <Nav />
-      <main>
+      <main className="min-h-screen">
         <Hero />
         <About />
         <Work />
@@ -18,9 +18,9 @@ export default function Home() {
         <Journey />
         <Contact />
       </main>
-      <footer className="border-t border-border py-8 text-center text-[0.75rem] text-muted-foreground tracking-[0.04em]">
+      <footer className="border-t border-[#141414]/10 dark:border-white/10 py-8 text-center text-[0.8rem] font-mono text-[#141414]/60 dark:text-neutral-400 bg-[#f6f4f0] dark:bg-[#121214] transition-colors">
         <p>
-          Designed &amp; built by <span className="text-accent">Vaibhav Jadhav</span>
+          Designed &amp; built by <span className="text-[#e5262c] font-bold">Vaibhav Jadhav</span>
           &nbsp;·&nbsp; © 2026 &nbsp;·&nbsp; All rights reserved.
         </p>
       </footer>

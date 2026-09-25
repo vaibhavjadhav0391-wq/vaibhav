@@ -3,75 +3,83 @@ const entries = [
     date: "2024 — Ongoing",
     title: "Software Engineering Intern",
     org: "Connect Soft Infotech, Pune",
+    badge: "Industry Experience",
     bullets: [
-      "Collaborated with senior developers to apply professional software development ethics and best practices.",
-      "Translated theoretical knowledge into real-world professional applications in a team environment.",
-      "Demonstrated high discipline and cooperation in a fast-paced development environment.",
+      "Collaborated with senior engineers adhering to production software engineering standards and agile workflows.",
+      "Engineered real-world application modules, optimizing state flows and backend response times.",
+      "Demonstrated high problem-solving velocity and discipline within a cross-functional team.",
     ],
   },
   {
     date: "2024",
-    title: "Virtual Intern",
-    org: "Deloitte Virtual Program",
+    title: "Virtual Engineering Program",
+    org: "Deloitte Virtual Experience",
+    badge: "Enterprise Training",
     bullets: [
-      "Completed modules in coding, software development, and data model reconciliation.",
-      "Prepared professional software development proposals and solved complex logic problems.",
+      "Completed modules in system architecture, software development, and data reconciliation.",
+      "Authored professional architectural proposals and tackled complex algorithmic logic problems.",
     ],
   },
   {
-    date: "2023 — Pursuing (3rd Year)",
-    title: "B.Tech in AIDS",
+    date: "2023 — 2026 (3rd Year)",
+    title: "B.Tech in Computer Science & AI",
     org: "Maharashtra Institute of Technology, CSN · CGPA 9.45",
+    badge: "Department Top Ranker",
     bullets: [
-      "Consistently top-performing student in the department.",
-      "Actively engaged in coding challenges and emerging AI technologies.",
+      "Top-performing student in the department with an outstanding 9.45 CGPA.",
+      "Spearheaded technical development for key departmental software initiatives.",
     ],
   },
   {
     date: "Completed",
     title: "Diploma in Computer Science",
     org: "MSBTE Board · Result: Distinction",
-    bullets: ["Awarded Distinction — Academic Excellence recognition from the board."],
-  },
-  {
-    date: "2024 — Ongoing",
-    title: "Advanced Programming Specialization",
-    org: "Udemy Certification",
+    badge: "Board Distinction",
     bullets: [
-      "Intensive coursework on advanced technical skill-building and program logic.",
-      "Currently exploring and implementing AI models for modern automation tasks.",
+      "Awarded Distinction for exceptional academic excellence across all semesters.",
     ],
   },
 ]
 
 export function Journey() {
   return (
-    <section id="journey" className="py-28 border-t border-border">
+    <section id="journey" className="py-24 border-t border-border bg-background transition-colors duration-300">
       <div className="container mx-auto px-[max(4vw,1.5rem)] max-w-[1080px] text-center">
-        <p className="section-label reveal">Experience &amp; Education</p>
-        <h2 className="section-heading reveal delay-100">The Journey</h2>
+        <p className="section-label">Experience &amp; Education</p>
+        <h2 className="section-heading text-foreground">Career Journey</h2>
 
-        <div className="max-w-[620px] mx-auto text-left relative pl-9">
-          {/* Vertical line */}
-          <div className="absolute left-0 top-2 bottom-2 w-px bg-border" />
+        <div className="max-w-[700px] mx-auto text-left relative pl-8">
+          {/* Vertical line with accent */}
+          <div className="absolute left-0 top-3 bottom-3 w-[2px] bg-gradient-to-b from-accent via-border to-accent" />
 
-          {entries.map((e, i) => (
+          {entries.map((e) => (
             <div
               key={e.title}
-              className={`relative pb-12 last:pb-0 reveal delay-${Math.min((i + 1) * 100, 400)}`}
+              className="relative pb-10 last:pb-0"
             >
               {/* Dot */}
-              <div className="absolute -left-9 top-[0.42rem] w-2.5 h-2.5 rounded-full bg-accent -ml-[4.5px]" />
+              <div className="absolute -left-8 top-[0.35rem] w-3 h-3 rounded-full bg-accent ring-4 ring-background -ml-[5px]" />
 
-              <div className="text-[0.72rem] font-semibold tracking-[0.1em] uppercase text-accent mb-1">
-                {e.date}
+              <div className="flex items-center gap-2 mb-1 flex-wrap">
+                <span className="text-[0.74rem] font-mono font-bold uppercase text-accent">
+                  {e.date}
+                </span>
+                <span className="text-[0.68rem] font-mono px-2 py-0.5 rounded-full bg-accent/10 text-accent border border-accent/20">
+                  {e.badge}
+                </span>
               </div>
-              <div className="font-serif text-[1.15rem] font-normal mb-0.5">{e.title}</div>
-              <div className="text-[0.85rem] text-muted-foreground mb-3">{e.org}</div>
-              <div className="flex flex-col gap-1.5">
+
+              <h3 className="font-serif text-[1.25rem] font-bold text-foreground mb-0.5">
+                {e.title}
+              </h3>
+              <p className="text-[0.88rem] font-medium text-muted-foreground mb-3">
+                {e.org}
+              </p>
+
+              <div className="space-y-1.5 p-4 rounded-xl bg-card border border-border shadow-sm">
                 {e.bullets.map((b) => (
-                  <div key={b} className="text-[0.85rem] text-muted-foreground flex gap-2.5">
-                    <span className="text-accent flex-shrink-0">—</span>
+                  <div key={b} className="text-[0.88rem] text-foreground/80 flex gap-2.5 items-start">
+                    <span className="text-accent font-bold flex-shrink-0">›</span>
                     <span>{b}</span>
                   </div>
                 ))}

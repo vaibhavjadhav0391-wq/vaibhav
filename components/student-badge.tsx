@@ -1,131 +1,236 @@
-﻿"use client"
+"use client"
 
 import Image from "next/image"
-import { Sparkles, QrCode, Mail, GraduationCap, Award } from "lucide-react"
+import { useTheme } from "next-themes"
+import { useEffect, useState } from "react"
 import LanyardBadge from "@/components/ui/lanyard-badge"
-
-function GitHubIcon({ className = "w-4 h-4" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-      <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4" />
-      <path d="M9 18c-4.51 2-5-2-7-2" />
-    </svg>
-  )
-}
-
-function LinkedInIcon({ className = "w-4 h-4" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-      <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
-      <rect width="4" height="12" x="2" y="9" />
-      <circle cx="4" cy="4" r="2" />
-    </svg>
-  )
-}
 
 interface StudentBadgeProps {
   height?: string
   cardWidth?: number
 }
 
-export function StudentBadge({ height = "520px", cardWidth = 230 }: StudentBadgeProps) {
+export function StudentBadge({ height = "580px", cardWidth = 230 }: StudentBadgeProps) {
+  const { resolvedTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => setMounted(true), [])
+
+  const isDark = mounted ? resolvedTheme === "dark" : false
+
+  // Poster Red & Paper White palette
+  const cardBg = isDark
+    ? "linear-gradient(145deg, #1c1c20 0%, #141416 60%, #18181c 100%)"
+    : "linear-gradient(145deg, #ffffff 0%, #faf8f5 60%, #f4f0e8 100%)"
+
+  const backBg = isDark
+    ? "linear-gradient(145deg, #18181c 0%, #121214 60%, #1a1a1e 100%)"
+    : "linear-gradient(145deg, #ffffff 0%, #fbfaf8 60%, #eeebe4 100%)"
+
+  const textColor = isDark ? "#f4f4f5" : "#141414"
+  const mutedColor = isDark ? "#a1a1aa" : "#666666"
+  const redAccent = "#e5262c"
+  const borderColor = isDark ? "rgba(229, 38, 44, 0.4)" : "rgba(229, 38, 44, 0.35)"
+  const innerBorder = isDark ? "rgba(255, 255, 255, 0.1)" : "rgba(20, 20, 20, 0.1)"
+  const chipBg = isDark ? "rgba(255, 255, 255, 0.06)" : "rgba(229, 38, 44, 0.06)"
+  const chipBorder = isDark ? "rgba(255, 255, 255, 0.12)" : "rgba(229, 38, 44, 0.18)"
+
+  const frontCard = (
+    <div
+      className="relative h-full w-full flex flex-col justify-between p-5 text-left select-none overflow-hidden"
+      style={{
+        background: cardBg,
+        color: textColor,
+        border: `1.5px solid ${borderColor}`,
+        boxShadow: "0 10px 30px -10px rgba(229, 38, 44, 0.15)",
+      }}
+    >
+      {/* Decorative Red Corner Rule */}
+      <div className="absolute top-0 right-0 w-8 h-8 pointer-events-none overflow-hidden">
+        <div className="absolute top-0 right-0 w-12 h-1 bg-[#e5262c]" />
+        <div className="absolute top-0 right-0 w-1 h-12 bg-[#e5262c]" />
+      </div>
+
+      {/* Top Header */}
+      <div className="relative z-10 pt-3 flex items-center justify-between pb-2.5" style={{ borderBottom: `1px solid ${innerBorder}` }}>
+        <div>
+          <span className="text-[9.5px] font-mono tracking-widest font-bold uppercase block text-[#e5262c]">
+            MIT CSN · ID PASS
+          </span>
+          <span className="text-[7.5px] tracking-wider font-mono font-medium" style={{ color: mutedColor }}>
+            B.TECH CS &amp; AI · 2026
+          </span>
+        </div>
+        <div
+          className="flex items-center gap-1.5 px-2 py-0.5 rounded-full"
+          style={{ background: "rgba(229, 38, 44, 0.1)", border: `1px solid ${borderColor}` }}
+        >
+          <span className="w-1.5 h-1.5 rounded-full bg-[#e5262c] animate-pulse" />
+          <span className="text-[7.5px] font-mono font-bold text-[#e5262c]">ACTIVE</span>
+        </div>
+      </div>
+
+      {/* Profile Photo & Primary Info */}
+      <div className="relative z-10 flex flex-col items-center my-auto py-1 text-center">
+        {/* Profile Image with Red Ring & Glow */}
+        <div className="relative mb-3 group cursor-pointer">
+          <div
+            className="absolute -inset-1 rounded-full opacity-70 blur-[3px]"
+            style={{ background: `linear-gradient(to right, ${redAccent}, #ff7b80, ${redAccent})` }}
+          />
+          <div
+            className="relative w-24 h-24 rounded-full overflow-hidden shadow-xl"
+            style={{ border: `2.5px solid ${redAccent}`, backgroundColor: isDark ? "#18181b" : "#ffffff" }}
+          >
+            <Image
+              src="/vaibhav.png"
+              alt="Vaibhav Jadhav"
+              width={120}
+              height={120}
+              priority
+              className="w-full h-full object-cover object-top hover:scale-105 transition-transform duration-300"
+            />
+          </div>
+          {/* Smart Chip Icon */}
+          <div
+            className="absolute bottom-0 right-0 w-6 h-6 rounded-full flex items-center justify-center text-[10px] shadow"
+            style={{ backgroundColor: "#ffffff", border: `1.5px solid ${redAccent}`, color: redAccent }}
+          >
+            ⚡
+          </div>
+        </div>
+
+        <h3 className="font-serif text-[18px] font-bold tracking-tight leading-tight" style={{ color: textColor }}>
+          Vaibhav Jadhav
+        </h3>
+        <p className="text-[10px] font-bold tracking-wider uppercase mt-0.5 text-[#e5262c]">
+          Mobile &amp; AI Developer
+        </p>
+
+        <div
+          className="mt-2.5 inline-flex items-center gap-2 px-2.5 py-1 rounded-md text-[8.5px] font-mono"
+          style={{ background: chipBg, border: `1px solid ${chipBorder}`, color: textColor }}
+        >
+          <span>CGPA <strong className="text-[#e5262c] font-bold">9.45</strong></span>
+          <span className="opacity-40">|</span>
+          <span className="font-semibold text-[#141414] dark:text-neutral-200">Distinction</span>
+        </div>
+      </div>
+
+      {/* Bottom Barcode / Flip Cue */}
+      <div className="relative z-10 pt-2 flex items-center justify-between" style={{ borderTop: `1px solid ${innerBorder}` }}>
+        {/* Decorative Barcode */}
+        <div className="flex items-center gap-[2px] opacity-80">
+          {[2, 1, 3, 1, 2, 4, 1, 2, 3, 1].map((w, idx) => (
+            <span
+              key={idx}
+              className="h-5 inline-block"
+              style={{ width: `${w}px`, backgroundColor: idx % 3 === 0 ? redAccent : textColor }}
+            />
+          ))}
+        </div>
+        <span className="text-[8px] font-mono font-semibold tracking-wider flex items-center gap-1 text-[#e5262c] hover:opacity-80">
+          Click to flip ↻
+        </span>
+      </div>
+    </div>
+  )
+
+  const backCard = (
+    <div
+      className="relative h-full w-full flex flex-col justify-between p-5 text-left select-none overflow-hidden"
+      style={{
+        background: backBg,
+        color: textColor,
+        border: `1.5px solid ${borderColor}`,
+        boxShadow: "0 10px 30px -10px rgba(229, 38, 44, 0.15)",
+      }}
+    >
+      {/* Top Header */}
+      <div className="relative z-10 pt-3 flex items-center justify-between pb-2.5" style={{ borderBottom: `1px solid ${innerBorder}` }}>
+        <div>
+          <span className="text-[9.5px] font-mono tracking-widest font-bold uppercase block text-[#e5262c]">
+            DEVELOPER CREDENTIALS
+          </span>
+          <span className="text-[7.5px] tracking-wider font-mono font-medium" style={{ color: mutedColor }}>
+            CONNECT &amp; VERIFICATION
+          </span>
+        </div>
+        <div
+          className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold text-white bg-[#e5262c]"
+        >
+          ✓
+        </div>
+      </div>
+
+      {/* Core Specs / Highlights */}
+      <div className="relative z-10 flex flex-col gap-2.5 my-auto py-1">
+        <div>
+          <span className="text-[8px] font-mono font-bold uppercase tracking-wider block mb-1 text-[#e5262c]">
+            CORE DOMAINS
+          </span>
+          <div className="flex flex-wrap gap-1">
+            {["Android Kotlin", "Jetpack Compose", "Next.js", "AI Automation", "Firebase"].map((tech) => (
+              <span
+                key={tech}
+                className="px-1.5 py-0.5 rounded text-[7.5px] font-mono font-medium"
+                style={{ background: chipBg, border: `1px solid ${chipBorder}`, color: textColor }}
+              >
+                {tech}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        <div className="space-y-1 text-[8.5px] font-mono" style={{ color: textColor }}>
+          <div className="flex items-center justify-between py-0.5" style={{ borderBottom: `1px solid ${innerBorder}` }}>
+            <span style={{ color: mutedColor }}>Internship</span>
+            <span className="font-semibold">Connect Soft Infotech</span>
+          </div>
+          <div className="flex items-center justify-between py-0.5" style={{ borderBottom: `1px solid ${innerBorder}` }}>
+            <span style={{ color: mutedColor }}>Virtual Exp</span>
+            <span className="font-semibold">Deloitte Program</span>
+          </div>
+          <div className="flex items-center justify-between py-0.5" style={{ borderBottom: `1px solid ${innerBorder}` }}>
+            <span style={{ color: mutedColor }}>Location</span>
+            <span className="font-medium">Sambhajinagar, MH</span>
+          </div>
+          <div className="flex items-center justify-between py-0.5">
+            <span style={{ color: mutedColor }}>Contact</span>
+            <span className="truncate max-w-[130px] font-medium text-[#e5262c]">vaibhavjadhav0301@gmail.com</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Security Seal & Return Flip Button */}
+      <div className="relative z-10 pt-2 flex items-center justify-between" style={{ borderTop: `1px solid ${innerBorder}` }}>
+        <span className="text-[8px] font-mono font-bold text-[#e5262c] flex items-center gap-1">
+          ● VERIFIED PASS
+        </span>
+        <span className="text-[8px] font-mono font-bold text-[#141414] dark:text-neutral-200 hover:underline cursor-pointer flex items-center gap-1">
+          Back to Front ↺
+        </span>
+      </div>
+    </div>
+  )
+
   return (
-    <div className="relative w-full flex items-center justify-center select-none">
+    <div className="relative w-full h-full flex items-center justify-center select-none">
       <LanyardBadge
         height={height}
         cardWidth={cardWidth}
-        strapText="VAIBHAV JADHAV · B.TECH CS"
+        front={frontCard}
+        back={backCard}
+        title="Vaibhav Jadhav"
+        subtitle="CS Engineer · MIT CSN · 2026"
+        name="Vaibhav Jadhav"
+        role="Mobile & AI Developer"
+        strapText="vaibhav jadhav · portfolio"
         strapLabel="MIT CSN 2026"
-        strapColor="#0F1015"
-        inkColor="#8FA6FF"
-        cardColor="#14151B"
+        strapColor="#141414"
+        inkColor="#e5262c"
+        cardColor="#ffffff"
         flipButton={true}
-        front={
-          <div className="relative h-full w-full p-4 flex flex-col justify-between text-white bg-gradient-to-b from-[#181920] to-[#0F1015] border border-white/10 rounded-[14px] shadow-2xl overflow-hidden font-sans">
-            {/* Hologram / Accent gradient top right */}
-            <div className="absolute -top-10 -right-10 w-28 h-28 bg-[#8FA6FF]/15 rounded-full blur-2xl pointer-events-none" />
-            
-            {/* Header / Institution info */}
-            <div className="flex items-center justify-between z-10 pt-2">
-              <div className="flex items-center gap-1.5">
-                <GraduationCap className="w-3.5 h-3.5 text-[#8FA6FF]" />
-                <span className="text-[9px] font-bold tracking-wider uppercase text-zinc-300">
-                  MIT CSN
-                </span>
-              </div>
-              <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-[#8FA6FF]/10 border border-[#8FA6FF]/30">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#8FA6FF] animate-pulse" />
-                <span className="text-[8px] font-semibold text-[#8FA6FF] uppercase tracking-wide">STUDENT PASS</span>
-              </div>
-            </div>
-
-            {/* Profile Image & Name */}
-            <div className="flex flex-col items-center text-center my-auto z-10">
-              <div className="relative w-24 h-24 rounded-2xl overflow-hidden border-2 border-[#8FA6FF]/40 mb-2.5 bg-zinc-800/80 shadow-[0_8px_20px_rgba(0,0,0,0.5)]">
-                <Image
-                  src="/vaibhav.png"
-                  alt="Vaibhav Jadhav"
-                  fill
-                  sizes="100px"
-                  className="object-cover object-top"
-                  priority
-                />
-              </div>
-              <h3 className="text-base font-bold tracking-tight text-zinc-100">
-                Vaibhav Jadhav
-              </h3>
-              <p className="text-[11px] font-medium text-[#8FA6FF] mt-0.5">
-                B.Tech Computer Science
-              </p>
-              <div className="mt-1.5 inline-flex items-center gap-1 text-[9.5px] px-2 py-0.5 rounded-md bg-zinc-800/80 text-zinc-300 border border-zinc-700/50">
-                <Award className="w-3 h-3 text-amber-400" />
-                <span>CGPA: <strong>9.45</strong> / Distinction</span>
-              </div>
-            </div>
-
-            {/* Card Footer */}
-            <div className="flex justify-between items-center text-[9px] text-zinc-400 pt-2 border-t border-white/10 z-10">
-              <span className="font-mono">ID: MIT-2026-VJ</span>
-              <span className="text-emerald-400 font-semibold flex items-center gap-1">
-                <Sparkles className="w-2.5 h-2.5" /> VERIFIED
-              </span>
-            </div>
-          </div>
-        }
-        back={
-          <div className="relative h-full w-full p-4 flex flex-col justify-between text-white bg-gradient-to-b from-[#0F1015] to-[#0A0A0C] border border-white/10 rounded-[14px] shadow-2xl font-sans">
-            <div className="text-center pt-2">
-              <h4 className="text-[12px] font-bold text-zinc-200 tracking-wide uppercase">Connect & Explore</h4>
-              <p className="text-[9px] text-zinc-400 mt-0.5">Scan or visit portfolio</p>
-            </div>
-
-            <div className="flex justify-center my-auto">
-              <div className="p-2.5 bg-white rounded-xl shadow-lg flex flex-col items-center">
-                <QrCode className="w-20 h-20 text-black" />
-              </div>
-            </div>
-
-            <div className="flex flex-col items-center gap-2 pt-1 border-t border-white/10">
-              <div className="flex justify-center gap-4 text-zinc-400">
-                <a
-                  href="https://github.com/vaibhavjadhav0391-wq"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="p-1 rounded hover:text-[#8FA6FF] transition-colors"
-                >
-                  <GitHubIcon className="w-4 h-4" />
-                </a>
-                <a
-                  href="mailto:vaibhavjadhav0301@gmail.com"
-                  className="p-1 rounded hover:text-[#8FA6FF] transition-colors"
-                >
-                  <Mail className="w-4 h-4" />
-                </a>
-              </div>
-              <span className="text-[8px] text-zinc-500 font-mono tracking-wider">TAP CARD TO FLIP</span>
-            </div>
-          </div>
-        }
       />
     </div>
   )

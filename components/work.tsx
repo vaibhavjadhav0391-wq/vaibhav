@@ -18,67 +18,74 @@ const projects = [
     title: "SarkarSathi App",
     year: "2026",
     url: "https://github.com/vaibhavjadhav",
-    desc: "Helps users easily find government schemes and services in one place with a simple, user-friendly interface — reducing the friction of navigating fragmented official portals.",
-    tags: ["Android", "Kotlin", "Firebase"],
+    desc: "A centralized platform empowering citizens to effortlessly discover and apply for government schemes and entitlements through a modern, frictionless UI.",
+    tags: ["Android", "Kotlin", "Firebase", "Clean Architecture"],
   },
   {
     id: "rescuenet",
     title: "RescueNet — Disaster Management App",
     year: "2026",
     url: "https://github.com/vaibhavjadhav",
-    desc: "A disaster management system that coordinates rescue operations and shares essential information in emergency situations, keeping communities connected when it matters most.",
-    tags: ["Android", "Kotlin", "Real-time DB"],
+    desc: "A mission-critical disaster management system coordinating rescue operations, real-time SOS alerts, and verified emergency broadcast channels.",
+    tags: ["Android", "Kotlin", "Real-time DB", "Location Services"],
   },
   {
     id: "transitpulse",
     title: "TransitPulse — College Bus Tracker",
     year: "2026",
     url: "https://github.com/vaibhavjadhav",
-    desc: "Real-time college bus tracking web app with ML-based ETA predictions — keeps working even offline using smart caching and an offline-first design approach.",
-    tags: ["Next.js", "ML / ETA", "PWA"],
+    desc: "Real-time campus transit tracking web application featuring ML-powered arrival predictions (ETA) with full offline-first PWA caching support.",
+    tags: ["Next.js", "ML / ETA", "PWA", "Tailwind CSS"],
   },
   {
     id: "quicktransfer",
     title: "QuickTransfer — Scan. Send. Done.",
     year: "2026",
     url: "https://github.com/vaibhavjadhav",
-    desc: "Instant file transfer between phone and PC via QR code scan — no login, no third-party app required. Uses the local network for fast, private transfers.",
-    tags: ["React", "Node.js", "WebSockets"],
+    desc: "Blazing fast peer-to-peer file transfer between mobile and desktop via instantaneous QR code pairing on the local network with zero cloud lag.",
+    tags: ["React", "Node.js", "WebSockets", "Local Networking"],
   },
   {
     id: "translator",
     title: "Advanced Translator App",
     year: "2025",
     url: "https://github.com/vaibhavjadhav",
-    desc: "Multi-language Android translation app with speech-to-text and text-to-speech features — built to bridge communication gaps for everyday users across India and beyond.",
-    tags: ["Android", "Kotlin", "ML Kit"],
+    desc: "Multi-language Android translation application combining real-time speech-to-text, neural translation, and high-clarity voice playback.",
+    tags: ["Android", "Kotlin", "ML Kit", "Audio Processing"],
   },
   {
     id: "securelogin",
     title: "Android Secure Login System",
     year: "2026",
     url: "https://github.com/vaibhavjadhav",
-    desc: "A secure login system for Android with authentication, database integration, and intruder detection — prevents unauthorized access using photo capture on failed attempts.",
-    tags: ["Android", "Firebase Auth"],
+    desc: "Enterprise-grade biometric and multi-factor Android authentication suite with silent intruder photo capture on unauthorized access attempts.",
+    tags: ["Android", "Firebase Auth", "Biometrics", "Security"],
   },
 ]
 
 export function Work() {
-  const [openId, setOpenId] = useState<string | null>(null)
+  const [openId, setOpenId] = useState<string | null>("sarkarsathi")
 
   const toggle = (id: string) => setOpenId((prev) => (prev === id ? null : id))
 
   return (
-    <section id="work" className="py-28 border-t border-border">
+    <section id="work" className="py-24 border-t border-border bg-background transition-colors duration-300">
       <div className="container mx-auto px-[max(4vw,1.5rem)] max-w-[1080px] text-center">
-        <p className="section-label reveal">Selected Work</p>
-        <h2 className="section-heading reveal delay-100">Projects</h2>
+        <p className="section-label">Selected Work</p>
+        <h2 className="section-heading text-foreground">Engineered Projects</h2>
 
-        <div className="max-w-[780px] mx-auto text-left reveal delay-200">
+        <div className="max-w-[820px] mx-auto text-left space-y-3.5">
           {projects.map((p) => {
             const isOpen = openId === p.id
             return (
-              <div key={p.id} className="border-t border-border last:border-b">
+              <div
+                key={p.id}
+                className={`rounded-2xl border transition-all duration-300 overflow-hidden ${
+                  isOpen
+                    ? "bg-card border-accent/40 shadow-lg shadow-accent/5"
+                    : "bg-card/70 border-border hover:border-accent/30"
+                }`}
+              >
                 {/* Header row */}
                 <div
                   role="button"
@@ -86,27 +93,28 @@ export function Work() {
                   aria-expanded={isOpen}
                   onClick={() => toggle(p.id)}
                   onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && toggle(p.id)}
-                  className="flex items-center gap-4 py-5 cursor-pointer group"
+                  className="flex items-center gap-4 px-6 py-5 cursor-pointer group"
                 >
-                  <span className="font-serif text-[1.2rem] font-normal flex-1 transition-colors group-hover:text-accent">
+                  <span className={`w-2 h-2 rounded-full transition-colors ${isOpen ? "bg-accent" : "bg-muted-foreground/40 group-hover:bg-accent"}`} />
+                  <span className="font-serif text-[1.22rem] font-bold text-foreground flex-1 transition-colors group-hover:text-accent">
                     {p.title}
                   </span>
-                  <span className="text-[0.76rem] text-muted-foreground font-medium tracking-wide ml-2 flex-shrink-0">
+                  <span className="text-[0.78rem] font-mono font-bold text-accent px-2.5 py-0.5 rounded-full bg-accent/10 flex-shrink-0">
                     {p.year}
                   </span>
                   <a
                     href={p.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    aria-label="GitHub"
+                    aria-label="GitHub Repository"
                     onClick={(e) => e.stopPropagation()}
-                    className="w-[34px] h-[34px] rounded-full border border-border flex items-center justify-center text-muted-foreground hover:border-accent hover:text-accent transition-colors flex-shrink-0"
+                    className="w-8 h-8 rounded-full border border-border flex items-center justify-center text-muted-foreground hover:border-accent hover:text-accent hover:bg-accent/10 transition-colors flex-shrink-0"
                   >
-                    <GithubIcon size={13} />
+                    <GithubIcon size={14} />
                   </a>
                   <ChevronDown
                     size={18}
-                    className={`text-muted-foreground flex-shrink-0 transition-all duration-300 ${
+                    className={`text-muted-foreground flex-shrink-0 transition-transform duration-300 ${
                       isOpen ? "rotate-180 text-accent" : ""
                     }`}
                   />
@@ -114,17 +122,19 @@ export function Work() {
 
                 {/* Accordion body */}
                 <div
-                  className={`overflow-hidden transition-[max-height] duration-400 ease-in-out ${
-                    isOpen ? "max-h-48" : "max-h-0"
+                  className={`overflow-hidden transition-[max-height] duration-300 ease-in-out ${
+                    isOpen ? "max-h-60" : "max-h-0"
                   }`}
                 >
-                  <div className="pb-5">
-                    <p className="text-[0.9rem] text-muted-foreground leading-[1.7] mb-3">{p.desc}</p>
-                    <div className="flex gap-2 flex-wrap">
+                  <div className="px-6 pb-6 pt-1 border-t border-border/50">
+                    <p className="text-[0.94rem] text-muted-foreground leading-[1.75] mb-4">
+                      {p.desc}
+                    </p>
+                    <div className="flex gap-2 flex-wrap items-center">
                       {p.tags.map((t) => (
                         <span
                           key={t}
-                          className="inline-flex items-center px-3 py-1 rounded-full text-[0.72rem] font-medium bg-accent/10 text-accent border border-accent/20"
+                          className="inline-flex items-center px-3 py-1 rounded-full text-[0.72rem] font-mono font-medium bg-accent/10 text-accent border border-accent/20"
                         >
                           {t}
                         </span>
