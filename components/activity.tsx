@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState, useMemo } from "react"
-import { Flame, GitCommit, Code2, ExternalLink, Trophy, CheckCircle2 } from "lucide-react"
+import { Flame, GitCommit, Code2, ExternalLink, Trophy } from "lucide-react"
 
 interface ContributionDay {
   date: string
@@ -16,7 +16,6 @@ interface LeetCodeStats {
   hardSolved: number
   ranking: number
   submissionCalendar: Record<string, number>
-  recentSubmissions: { title: string; statusDisplay: string; lang: string }[]
 }
 
 export function Activity() {
@@ -31,11 +30,6 @@ export function Activity() {
     hardSolved: 5,
     ranking: 1750404,
     submissionCalendar: {},
-    recentSubmissions: [
-      { title: "Search in Rotated Sorted Array", statusDisplay: "Accepted", lang: "java" },
-      { title: "Sqrt(x)", statusDisplay: "Accepted", lang: "java" },
-      { title: "Search Insert Position", statusDisplay: "Accepted", lang: "java" },
-    ],
   })
   const [loadingLc, setLoadingLc] = useState<boolean>(true)
   const [activeTooltip, setActiveTooltip] = useState<{ text: string; x: number; y: number } | null>(null)
@@ -77,7 +71,6 @@ export function Activity() {
             hardSolved: data.hardSolved ?? 5,
             ranking: data.ranking ?? 1750404,
             submissionCalendar: data.submissionCalendar || {},
-            recentSubmissions: (data.recentSubmissions || []).slice(0, 3),
           })
         }
       } catch (err) {
@@ -89,7 +82,7 @@ export function Activity() {
     fetchLeetCode()
   }, [])
 
-  // Organize GitHub days into weeks
+  // Organize GitHub days into weeks (52-53 columns, 7 rows)
   const ghWeeks = useMemo(() => {
     if (ghContributions.length === 0) return []
     const cols: ContributionDay[][] = []
@@ -139,53 +132,53 @@ export function Activity() {
     return cols
   }, [lcStats.submissionCalendar])
 
-  // GitHub Cell Colors (Emerald)
+  // GitHub Cell Colors
   const getGhCellColor = (level: number) => {
     switch (level) {
       case 1:
-        return "bg-emerald-300 dark:bg-emerald-950/80 border border-emerald-500/40"
+        return "bg-emerald-800 border border-emerald-600/50"
       case 2:
-        return "bg-emerald-500 dark:bg-emerald-700"
+        return "bg-emerald-600 border border-emerald-500/60"
       case 3:
-        return "bg-emerald-600 dark:bg-emerald-500"
+        return "bg-emerald-400 border border-emerald-300"
       case 4:
-        return "bg-emerald-700 dark:bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.6)]"
+        return "bg-emerald-300 shadow-[0_0_8px_rgba(52,211,153,0.8)] border border-white"
       default:
-        return "bg-[#141414]/10 dark:bg-white/[0.06] border border-[#141414]/5 dark:border-white/[0.04]"
+        return "bg-white/[0.07] border border-white/[0.04]"
     }
   }
 
-  // LeetCode Cell Colors (Amber/Orange)
+  // LeetCode Cell Colors
   const getLcCellColor = (level: number) => {
     switch (level) {
       case 1:
-        return "bg-amber-300 dark:bg-amber-950/80 border border-amber-500/40"
+        return "bg-amber-800 border border-amber-600/50"
       case 2:
-        return "bg-amber-500 dark:bg-amber-700"
+        return "bg-amber-600 border border-amber-500/60"
       case 3:
-        return "bg-amber-600 dark:bg-amber-500"
+        return "bg-amber-400 border border-amber-300"
       case 4:
-        return "bg-amber-700 dark:bg-amber-400 shadow-[0_0_6px_rgba(251,191,36,0.6)]"
+        return "bg-amber-300 shadow-[0_0_8px_rgba(251,191,36,0.8)] border border-white"
       default:
-        return "bg-[#141414]/10 dark:bg-white/[0.06] border border-[#141414]/5 dark:border-white/[0.04]"
+        return "bg-white/[0.07] border border-white/[0.04]"
     }
   }
 
   return (
-    <section id="activity" className="py-24 relative overflow-hidden bg-transparent">
+    <section id="activity" className="py-24 relative overflow-hidden">
       <div className="container mx-auto px-[max(4vw,1.5rem)] max-w-[1200px]">
-        {/* Section Header with High Contrast */}
+        {/* Section Header with 100% Solid Visible Colors */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-12 gap-4">
           <div>
             <div className="flex items-center gap-2 text-xs font-mono tracking-widest text-[#e5262c] uppercase font-bold mb-2">
-              <Flame size={15} className="animate-pulse text-[#e5262c]" />
+              <Flame size={16} className="animate-pulse text-[#e5262c]" />
               <span>Continuous Output</span>
             </div>
-            <h2 className="font-serif text-3xl sm:text-4xl text-[#141414] dark:text-[#f6f4f0] font-normal tracking-tight">
+            <h2 className="font-serif text-3xl sm:text-4xl text-[#141414] dark:text-white font-bold tracking-tight">
               Activity &amp; Contributions
             </h2>
           </div>
-          <p className="text-xs sm:text-sm text-[#141414]/75 dark:text-neutral-400 max-w-md font-mono">
+          <p className="text-xs sm:text-sm text-[#141414]/80 dark:text-neutral-300 max-w-md font-mono font-medium leading-relaxed">
             Live-synced daily commits, problem-solving streaks, and algorithmic milestones.
           </p>
         </div>
@@ -193,20 +186,23 @@ export function Activity() {
         {/* Dashboard Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* GitHub Card */}
-          <div className="rounded-2xl border border-[#141414]/15 dark:border-white/10 bg-white dark:bg-[#16161a] p-6 sm:p-8 flex flex-col justify-between shadow-md transition-colors">
+          <div className="rounded-3xl border border-neutral-800/80 bg-[#121215] text-white p-7 sm:p-8 flex flex-col justify-between shadow-2xl relative overflow-hidden">
+            {/* Ambient subtle glow */}
+            <div className="absolute top-0 right-0 w-48 h-48 bg-emerald-500/5 blur-3xl pointer-events-none rounded-full" />
+
             <div>
               {/* Header */}
-              <div className="flex items-center justify-between mb-6 pb-4 border-b border-[#141414]/10 dark:border-white/10">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-[#141414] dark:bg-white text-white dark:text-[#141414] flex items-center justify-center font-bold shadow-xs">
-                    <GitCommit size={20} />
+              <div className="flex items-center justify-between mb-6 pb-4 border-b border-white/10">
+                <div className="flex items-center gap-3.5">
+                  <div className="w-11 h-11 rounded-2xl bg-white text-[#121215] flex items-center justify-center font-bold shadow-md">
+                    <GitCommit size={22} />
                   </div>
                   <div>
-                    <h3 className="font-bold text-base text-[#141414] dark:text-white flex items-center gap-2">
+                    <h3 className="font-bold text-base sm:text-lg text-white flex items-center gap-2">
                       GitHub Activity
-                      <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
                     </h3>
-                    <p className="text-xs text-[#141414]/60 dark:text-neutral-400 font-mono font-medium">@vaibhavjadhav0391-wq</p>
+                    <p className="text-xs text-neutral-400 font-mono font-medium mt-0.5">@vaibhavjadhav0391-wq</p>
                   </div>
                 </div>
 
@@ -214,37 +210,37 @@ export function Activity() {
                   href="https://github.com/vaibhavjadhav0391-wq"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 text-xs font-mono font-semibold px-3 py-1.5 rounded-full border border-[#141414]/15 dark:border-white/15 text-[#141414] dark:text-neutral-200 hover:border-[#e5262c] hover:text-[#e5262c] transition-all bg-[#141414]/[0.02] dark:bg-white/[0.02]"
+                  className="flex items-center gap-2 text-xs font-mono font-bold px-4 py-2 rounded-full bg-white/10 hover:bg-[#e5262c] text-white hover:text-white border border-white/15 transition-all shadow-sm"
                 >
                   <span>Profile</span>
                   <ExternalLink size={13} />
                 </a>
               </div>
 
-              {/* Total Contributions Count */}
-              <div className="flex items-baseline gap-2 mb-6">
-                <span className="text-3xl sm:text-4xl font-bold font-serif text-[#141414] dark:text-white">
+              {/* Total Contributions Metric */}
+              <div className="flex items-baseline gap-2.5 mb-6">
+                <span className="text-4xl sm:text-5xl font-bold font-serif text-white tracking-tight">
                   {totalGhContributions}
                 </span>
-                <span className="text-xs sm:text-sm text-[#141414]/75 dark:text-neutral-400 font-mono font-medium">
+                <span className="text-xs sm:text-sm text-neutral-300 font-mono font-medium">
                   contributions in the last year
                 </span>
               </div>
 
-              {/* Heatmap Grid View */}
-              <div className="relative overflow-x-auto pb-3 pt-1 scrollbar-thin">
+              {/* Heatmap Grid View (Scrollbar Hidden for Clean Look) */}
+              <div className="relative overflow-x-auto pb-4 pt-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
                 {loadingGh && ghWeeks.length === 0 ? (
-                  <div className="h-28 flex items-center justify-center text-xs font-mono text-[#141414]/50 dark:text-neutral-500">
+                  <div className="h-28 flex items-center justify-center text-xs font-mono text-neutral-400">
                     Syncing live GitHub timeline...
                   </div>
                 ) : (
-                  <div className="flex gap-[3.5px] min-w-[580px]">
+                  <div className="flex gap-[4px] min-w-[580px]">
                     {ghWeeks.map((week, wIdx) => (
-                      <div key={wIdx} className="flex flex-col gap-[3.5px]">
+                      <div key={wIdx} className="flex flex-col gap-[4px]">
                         {week.map((day) => (
                           <div
                             key={day.date}
-                            className={`w-[10px] h-[10px] rounded-[2px] cursor-pointer transition-all hover:scale-130 ${getGhCellColor(
+                            className={`w-[10.5px] h-[10.5px] rounded-[3px] cursor-pointer transition-all hover:scale-135 ${getGhCellColor(
                               day.level
                             )}`}
                             onMouseEnter={(e) => {
@@ -252,7 +248,7 @@ export function Activity() {
                               setActiveTooltip({
                                 text: `${day.count} contribution${day.count === 1 ? "" : "s"} on ${day.date}`,
                                 x: rect.left + rect.width / 2,
-                                y: rect.top - 8,
+                                y: rect.top - 10,
                               })
                             }}
                             onMouseLeave={() => setActiveTooltip(null)}
@@ -264,37 +260,40 @@ export function Activity() {
                 )}
               </div>
 
-              {/* Legend */}
-              <div className="flex items-center justify-between pt-4 mt-1 border-t border-[#141414]/10 dark:border-white/10 text-[11px] font-mono font-medium text-[#141414]/60 dark:text-neutral-400">
-                <span>Annual Commit Cadence</span>
+              {/* Legend & Cadence Footer */}
+              <div className="flex items-center justify-between pt-4 mt-2 border-t border-white/10 text-xs font-mono font-medium text-neutral-300">
+                <span className="text-neutral-300 font-semibold">Annual Commit Cadence</span>
                 <div className="flex items-center gap-1.5">
-                  <span>Less</span>
-                  <div className="w-[9px] h-[9px] rounded-[2px] bg-[#141414]/10 dark:bg-white/[0.06]" />
-                  <div className="w-[9px] h-[9px] rounded-[2px] bg-emerald-300 dark:bg-emerald-950/80" />
-                  <div className="w-[9px] h-[9px] rounded-[2px] bg-emerald-500 dark:bg-emerald-700" />
-                  <div className="w-[9px] h-[9px] rounded-[2px] bg-emerald-600 dark:bg-emerald-500" />
-                  <div className="w-[9px] h-[9px] rounded-[2px] bg-emerald-700 dark:bg-emerald-400" />
-                  <span>More</span>
+                  <span className="text-neutral-400 text-[11px]">Less</span>
+                  <div className="w-[10px] h-[10px] rounded-[2px] bg-white/[0.07]" />
+                  <div className="w-[10px] h-[10px] rounded-[2px] bg-emerald-800" />
+                  <div className="w-[10px] h-[10px] rounded-[2px] bg-emerald-600" />
+                  <div className="w-[10px] h-[10px] rounded-[2px] bg-emerald-400" />
+                  <div className="w-[10px] h-[10px] rounded-[2px] bg-emerald-300" />
+                  <span className="text-neutral-400 text-[11px]">More</span>
                 </div>
               </div>
             </div>
           </div>
 
           {/* LeetCode Card (With Matching Heatmap) */}
-          <div className="rounded-2xl border border-[#141414]/15 dark:border-white/10 bg-white dark:bg-[#16161a] p-6 sm:p-8 flex flex-col justify-between shadow-md transition-colors">
+          <div className="rounded-3xl border border-neutral-800/80 bg-[#121215] text-white p-7 sm:p-8 flex flex-col justify-between shadow-2xl relative overflow-hidden">
+            {/* Ambient subtle glow */}
+            <div className="absolute top-0 right-0 w-48 h-48 bg-amber-500/5 blur-3xl pointer-events-none rounded-full" />
+
             <div>
               {/* Header */}
-              <div className="flex items-center justify-between mb-6 pb-4 border-b border-[#141414]/10 dark:border-white/10">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30 flex items-center justify-center font-bold shadow-xs">
-                    <Code2 size={20} />
+              <div className="flex items-center justify-between mb-6 pb-4 border-b border-white/10">
+                <div className="flex items-center gap-3.5">
+                  <div className="w-11 h-11 rounded-2xl bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center justify-center font-bold shadow-md">
+                    <Code2 size={22} />
                   </div>
                   <div>
-                    <h3 className="font-bold text-base text-[#141414] dark:text-white flex items-center gap-2">
+                    <h3 className="font-bold text-base sm:text-lg text-white flex items-center gap-2">
                       LeetCode Progress
-                      <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                      <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse shadow-[0_0_8px_rgba(251,191,36,0.8)]" />
                     </h3>
-                    <p className="text-xs text-[#141414]/60 dark:text-neutral-400 font-mono font-medium">@vaibhav032526</p>
+                    <p className="text-xs text-neutral-400 font-mono font-medium mt-0.5">@vaibhav032526</p>
                   </div>
                 </div>
 
@@ -302,7 +301,7 @@ export function Activity() {
                   href="https://leetcode.com/u/vaibhav032526/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 text-xs font-mono font-semibold px-3 py-1.5 rounded-full border border-[#141414]/15 dark:border-white/15 text-[#141414] dark:text-neutral-200 hover:border-amber-500 hover:text-amber-500 transition-all bg-[#141414]/[0.02] dark:bg-white/[0.02]"
+                  className="flex items-center gap-2 text-xs font-mono font-bold px-4 py-2 rounded-full bg-white/10 hover:bg-amber-500 text-white hover:text-[#121215] border border-white/15 transition-all shadow-sm"
                 >
                   <span>Profile</span>
                   <ExternalLink size={13} />
@@ -312,33 +311,33 @@ export function Activity() {
               {/* Total Solved & Rank */}
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <span className="text-3xl sm:text-4xl font-bold font-serif text-[#141414] dark:text-white">
+                  <span className="text-4xl sm:text-5xl font-bold font-serif text-white tracking-tight">
                     {lcStats.totalSolved}
                   </span>
-                  <span className="block text-xs sm:text-sm text-[#141414]/75 dark:text-neutral-400 font-mono font-medium mt-0.5">
+                  <span className="block text-xs sm:text-sm text-neutral-300 font-mono font-medium mt-1">
                     Problems Solved
                   </span>
                 </div>
-                <div className="px-3.5 py-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-300 text-xs font-mono font-bold flex items-center gap-1.5 shadow-xs">
-                  <Trophy size={14} className="text-amber-500" />
+                <div className="px-4 py-2 rounded-full border border-amber-500/40 bg-amber-500/15 text-amber-300 text-xs font-mono font-bold flex items-center gap-2 shadow-sm">
+                  <Trophy size={15} className="text-amber-400" />
                   <span>Rank ~{Math.round(lcStats.ranking / 1000)}k</span>
                 </div>
               </div>
 
-              {/* LeetCode Heatmap Grid View */}
-              <div className="relative overflow-x-auto pb-3 pt-1 scrollbar-thin mb-4">
+              {/* LeetCode Heatmap Grid View (Scrollbar Hidden) */}
+              <div className="relative overflow-x-auto pb-4 pt-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden mb-4">
                 {loadingLc && lcWeeks.length === 0 ? (
-                  <div className="h-28 flex items-center justify-center text-xs font-mono text-[#141414]/50 dark:text-neutral-500">
+                  <div className="h-28 flex items-center justify-center text-xs font-mono text-neutral-400">
                     Syncing live LeetCode timeline...
                   </div>
                 ) : (
-                  <div className="flex gap-[3.5px] min-w-[580px]">
+                  <div className="flex gap-[4px] min-w-[580px]">
                     {lcWeeks.map((week, wIdx) => (
-                      <div key={wIdx} className="flex flex-col gap-[3.5px]">
+                      <div key={wIdx} className="flex flex-col gap-[4px]">
                         {week.map((day) => (
                           <div
                             key={day.date}
-                            className={`w-[10px] h-[10px] rounded-[2px] cursor-pointer transition-all hover:scale-130 ${getLcCellColor(
+                            className={`w-[10.5px] h-[10.5px] rounded-[3px] cursor-pointer transition-all hover:scale-135 ${getLcCellColor(
                               day.level
                             )}`}
                             onMouseEnter={(e) => {
@@ -346,7 +345,7 @@ export function Activity() {
                               setActiveTooltip({
                                 text: `${day.count} LeetCode submission${day.count === 1 ? "" : "s"} on ${day.date}`,
                                 x: rect.left + rect.width / 2,
-                                y: rect.top - 8,
+                                y: rect.top - 10,
                               })
                             }}
                             onMouseLeave={() => setActiveTooltip(null)}
@@ -359,23 +358,23 @@ export function Activity() {
               </div>
 
               {/* Problem Breakdown Meter */}
-              <div className="grid grid-cols-3 gap-3 pt-4 border-t border-[#141414]/10 dark:border-white/10">
+              <div className="grid grid-cols-3 gap-3.5 pt-4 border-t border-white/10">
                 {/* Easy */}
-                <div className="p-2.5 rounded-xl bg-[#141414]/[0.03] dark:bg-white/[0.03] border border-[#141414]/5 dark:border-white/5 text-center">
-                  <span className="text-[11px] font-mono font-bold text-emerald-600 dark:text-emerald-400 block uppercase">Easy</span>
-                  <span className="text-lg font-bold font-serif text-[#141414] dark:text-white">{lcStats.easySolved}</span>
+                <div className="p-3 rounded-2xl bg-white/[0.05] border border-white/10 text-center">
+                  <span className="text-xs font-mono font-bold text-emerald-400 block uppercase tracking-wider">Easy</span>
+                  <span className="text-xl font-bold font-serif text-white mt-0.5 block">{lcStats.easySolved}</span>
                 </div>
 
                 {/* Medium */}
-                <div className="p-2.5 rounded-xl bg-[#141414]/[0.03] dark:bg-white/[0.03] border border-[#141414]/5 dark:border-white/5 text-center">
-                  <span className="text-[11px] font-mono font-bold text-amber-600 dark:text-amber-400 block uppercase">Medium</span>
-                  <span className="text-lg font-bold font-serif text-[#141414] dark:text-white">{lcStats.mediumSolved}</span>
+                <div className="p-3 rounded-2xl bg-white/[0.05] border border-white/10 text-center">
+                  <span className="text-xs font-mono font-bold text-amber-400 block uppercase tracking-wider">Medium</span>
+                  <span className="text-xl font-bold font-serif text-white mt-0.5 block">{lcStats.mediumSolved}</span>
                 </div>
 
                 {/* Hard */}
-                <div className="p-2.5 rounded-xl bg-[#141414]/[0.03] dark:bg-white/[0.03] border border-[#141414]/5 dark:border-white/5 text-center">
-                  <span className="text-[11px] font-mono font-bold text-[#e5262c] block uppercase">Hard</span>
-                  <span className="text-lg font-bold font-serif text-[#141414] dark:text-white">{lcStats.hardSolved}</span>
+                <div className="p-3 rounded-2xl bg-white/[0.05] border border-white/10 text-center">
+                  <span className="text-xs font-mono font-bold text-[#e5262c] block uppercase tracking-wider">Hard</span>
+                  <span className="text-xl font-bold font-serif text-white mt-0.5 block">{lcStats.hardSolved}</span>
                 </div>
               </div>
             </div>
@@ -383,10 +382,10 @@ export function Activity() {
         </div>
       </div>
 
-      {/* Floating Tooltip */}
+      {/* Floating Tooltip with High Contrast */}
       {activeTooltip && (
         <div
-          className="fixed pointer-events-none z-50 px-3 py-1.5 text-xs font-mono font-semibold rounded-md bg-[#141414] text-white dark:bg-white dark:text-[#141414] shadow-xl -translate-x-1/2 -translate-y-full border border-white/20 dark:border-black/20"
+          className="fixed pointer-events-none z-50 px-3.5 py-2 text-xs font-mono font-bold rounded-lg bg-white text-[#121215] shadow-2xl -translate-x-1/2 -translate-y-full border border-neutral-300"
           style={{ left: `${activeTooltip.x}px`, top: `${activeTooltip.y}px` }}
         >
           {activeTooltip.text}
