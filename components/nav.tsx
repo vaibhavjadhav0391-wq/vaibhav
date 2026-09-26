@@ -5,7 +5,7 @@ import { Sun, Moon } from "lucide-react"
 import { useEffect, useState } from "react"
 
 const links = [
-  { href: "#about", label: "About & ID" },
+  { href: "#about", label: "About" },
   { href: "#work", label: "Work" },
   { href: "#toolkit", label: "Toolkit" },
   { href: "#journey", label: "Journey" },
@@ -17,8 +17,8 @@ export function Nav() {
   const [mounted, setMounted] = useState(false)
   const [scrolled, setScrolled] = useState(false)
 
-  useEffect(() => setMounted(true), [])
   useEffect(() => {
+    setMounted(true)
     const onScroll = () => setScrolled(window.scrollY > 20)
     window.addEventListener("scroll", onScroll, { passive: true })
     return () => window.removeEventListener("scroll", onScroll)
@@ -32,79 +32,70 @@ export function Nav() {
   }
 
   return (
-    <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled
-          ? "bg-[#f6f4f0]/95 dark:bg-[#121214]/95 backdrop-blur-md border-b border-[#141414]/10 dark:border-white/10 shadow-sm"
-          : "bg-[#f6f4f0]/80 dark:bg-[#121214]/80 backdrop-blur-sm border-b border-transparent"
-      }`}
-    >
-      <div className="container mx-auto px-[max(4vw,1.5rem)] max-w-[1200px] h-16 flex items-center justify-between">
-        {/* Brand / Logo */}
-        <a
-          href="#hero"
-          className="font-serif text-[1.15rem] font-bold text-[#141414] dark:text-white flex items-center gap-1.5 hover:opacity-80 transition-opacity"
-          aria-label="Home"
+    <header className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 pointer-events-none">
+      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 pt-4">
+        <div
+          className={`pointer-events-auto flex items-center justify-between px-5 py-3 rounded-full transition-all duration-300 ${
+            scrolled
+              ? "bg-[#f6f4f0]/85 dark:bg-[#121214]/85 backdrop-blur-md border border-[#141414]/10 dark:border-white/10 shadow-sm"
+              : "bg-[#f6f4f0]/50 dark:bg-[#121214]/50 backdrop-blur-sm border border-transparent"
+          }`}
         >
-          <span>Vaibhav Jadhav</span>
-          <span className="w-2 h-2 rounded-full bg-[#e5262c]" />
-        </a>
-
-        {/* Center / Right Nav links */}
-        <nav className="hidden md:flex items-center gap-8">
-          {links.map((l) => (
-            <a
-              key={l.href}
-              href={l.href}
-              className="text-[0.86rem] font-medium text-[#141414]/80 dark:text-neutral-300 hover:text-[#e5262c] dark:hover:text-[#e5262c] transition-colors tracking-wide"
-            >
-              {l.label}
-            </a>
-          ))}
-        </nav>
-
-        {/* Right: Mobile quick links + Theme Toggle */}
-        <div className="flex items-center gap-3">
-          <div className="flex md:hidden gap-3 items-center mr-1">
-            <a
-              href="#about"
-              className="text-[0.82rem] font-semibold text-[#141414] dark:text-neutral-200 hover:text-[#e5262c]"
-            >
-              ID Pass
-            </a>
-            <a
-              href="#contact"
-              className="text-[0.82rem] font-semibold text-[#e5262c]"
-            >
-              Contact
-            </a>
-          </div>
-
-          {/* Theme Toggle Button */}
-          <button
-            type="button"
-            onClick={toggleTheme}
-            aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-[#141414]/15 dark:border-white/20 bg-white/60 dark:bg-[#1c1c20] text-[#141414] dark:text-neutral-200 hover:border-[#e5262c] hover:text-[#e5262c] transition-all shadow-sm"
+          {/* Logo / Name */}
+          <a
+            href="#hero"
+            className="flex items-center gap-2 group tracking-tight"
+            aria-label="Home"
           >
-            {mounted ? (
-              isDark ? (
-                <>
+            <span className="font-serif font-bold text-base sm:text-lg text-[#141414] dark:text-[#f6f4f0] transition-colors">
+              Vaibhav Jadhav
+            </span>
+            <span className="w-1.5 h-1.5 rounded-full bg-[#e5262c] group-hover:scale-125 transition-transform" />
+          </a>
+
+          {/* Nav Links */}
+          <nav className="hidden md:flex items-center gap-7">
+            {links.map((link) => (
+              <a
+                key={link.href}
+                href={link.href}
+                className="text-xs uppercase tracking-[0.14em] font-medium text-[#141414]/70 dark:text-[#f6f4f0]/70 hover:text-[#e5262c] dark:hover:text-[#e5262c] transition-colors"
+              >
+                {link.label}
+              </a>
+            ))}
+          </nav>
+
+          {/* Action / Theme Toggle */}
+          <div className="flex items-center gap-2.5">
+            <a
+              href="mailto:vaibhavjadhav0301@gmail.com"
+              className="hidden sm:inline-flex text-xs font-semibold px-3 py-1.5 rounded-full bg-[#e5262c] text-white hover:bg-[#c91e24] transition-colors shadow-xs"
+            >
+              Get in touch
+            </a>
+
+            <button
+              type="button"
+              onClick={toggleTheme}
+              aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+              className="p-2 rounded-full border border-[#141414]/10 dark:border-white/10 bg-white/50 dark:bg-white/5 text-[#141414] dark:text-[#f6f4f0] hover:border-[#e5262c] hover:text-[#e5262c] transition-all"
+            >
+              {mounted ? (
+                isDark ? (
                   <Sun size={15} className="text-amber-400" />
-                  <span className="text-xs font-mono font-medium hidden sm:inline">Light</span>
-                </>
-              ) : (
-                <>
+                ) : (
                   <Moon size={15} className="text-[#141414]" />
-                  <span className="text-xs font-mono font-medium hidden sm:inline">Dark</span>
-                </>
-              )
-            ) : (
-              <Moon size={15} />
-            )}
-          </button>
+                )
+              ) : (
+                <div className="w-[15px] h-[15px]" />
+              )}
+            </button>
+          </div>
         </div>
       </div>
     </header>
   )
 }
+
+export default Nav
