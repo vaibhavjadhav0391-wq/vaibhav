@@ -37,9 +37,9 @@ export function Nav() {
       <div className="max-w-[1200px] mx-auto px-4 sm:px-6 pt-4">
         <div
           className={`pointer-events-auto flex items-center justify-between px-5 py-3 rounded-full transition-all duration-300 ${
-            scrolled
-              ? "bg-[#f6f4f0]/90 dark:bg-[#121214]/90 backdrop-blur-md border border-[#141414]/10 dark:border-white/10 shadow-sm"
-              : "bg-[#f6f4f0]/60 dark:bg-[#121214]/60 backdrop-blur-sm border border-transparent"
+            isDark
+              ? "bg-[#18181c]/95 border border-white/15 text-white shadow-xl shadow-black/40 backdrop-blur-md"
+              : "bg-white/90 border border-neutral-300/80 text-[#141414] shadow-lg shadow-black/5 backdrop-blur-md"
           }`}
         >
           {/* Logo / Name */}
@@ -49,8 +49,9 @@ export function Nav() {
             aria-label="Home"
           >
             <span
-              className="font-serif font-bold text-base sm:text-lg transition-colors"
-              style={{ color: "var(--foreground)" }}
+              className={`font-serif font-bold text-base sm:text-lg transition-colors ${
+                isDark ? "text-white" : "text-[#141414]"
+              }`}
             >
               Vaibhav Jadhav
             </span>
@@ -63,8 +64,11 @@ export function Nav() {
               <a
                 key={link.href}
                 href={link.href}
-                className="text-xs uppercase tracking-[0.14em] font-medium opacity-80 hover:opacity-100 hover:text-[#e5262c] transition-colors"
-                style={{ color: "var(--foreground)" }}
+                className={`text-xs uppercase tracking-[0.14em] font-semibold transition-colors ${
+                  isDark
+                    ? "text-neutral-300 hover:text-[#e5262c]"
+                    : "text-neutral-700 hover:text-[#e5262c]"
+                }`}
               >
                 {link.label}
               </a>
@@ -76,13 +80,14 @@ export function Nav() {
             <a
               href="/Vaibhav_Jadhav_Resume.docx"
               download="Vaibhav_Jadhav_Resume.docx"
-              className="inline-flex items-center gap-1.5 text-xs font-mono font-bold px-3.5 py-1.5 rounded-full border border-border bg-card shadow-2xs hover:border-[#e5262c] hover:bg-[#e5262c]/10 transition-all group"
-              style={{ color: "var(--foreground)" }}
+              className={`inline-flex items-center gap-1.5 text-xs font-mono font-bold px-3.5 py-1.5 rounded-full border transition-all shadow-2xs group ${
+                isDark
+                  ? "bg-white/10 border-white/20 text-white hover:border-[#e5262c] hover:bg-[#e5262c]/10 hover:text-[#e5262c]"
+                  : "bg-neutral-100 border-neutral-300 text-[#141414] hover:border-[#e5262c] hover:bg-[#e5262c]/10 hover:text-[#e5262c]"
+              }`}
             >
               <FileDown size={14} className="text-[#e5262c] group-hover:-translate-y-0.5 transition-transform" />
-              <span style={{ color: "var(--foreground)" }} className="group-hover:text-[#e5262c]">
-                Resume
-              </span>
+              <span>Resume</span>
             </a>
 
             <a
@@ -96,8 +101,11 @@ export function Nav() {
               type="button"
               onClick={toggleTheme}
               aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
-              className="p-2 rounded-full border border-border bg-card hover:border-[#e5262c] hover:text-[#e5262c] transition-all cursor-pointer"
-              style={{ color: "var(--foreground)" }}
+              className={`p-2 rounded-full border transition-all cursor-pointer ${
+                isDark
+                  ? "border-white/20 bg-white/10 text-white hover:border-[#e5262c] hover:text-[#e5262c]"
+                  : "border-neutral-300 bg-neutral-100 text-[#141414] hover:border-[#e5262c] hover:text-[#e5262c]"
+              }`}
             >
               {mounted ? (
                 isDark ? (
