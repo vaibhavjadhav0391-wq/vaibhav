@@ -198,7 +198,7 @@ export function StudentBadge({
           </div>
           <div className="flex items-center justify-between py-0.5">
             <span style={{ color: mutedColor }}>Contact</span>
-            <span className="truncate max-w-[120px] font-medium text-[#e5262c]">vaibhavjadhav0301@gmail.com</span>
+            <span className="truncate max-w-[120px] font-medium text-[#e5262c]">vaibhavjadhav0391@gmail.com</span>
           </div>
         </div>
       </div>

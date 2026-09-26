@@ -11,10 +11,10 @@ export function Contact() {
 
         <div className="my-6">
           <a
-            href="mailto:vaibhavjadhav0301@gmail.com"
+            href="mailto:vaibhavjadhav0391@gmail.com"
             className="font-serif text-[clamp(1.5rem,4vw,2.5rem)] font-bold text-foreground underline decoration-accent underline-offset-[8px] hover:text-accent transition-colors"
           >
-            vaibhavjadhav0301@gmail.com
+            vaibhavjadhav0391@gmail.com
           </a>
         </div>
 
@@ -29,7 +29,7 @@ export function Contact() {
             <span>Download Official Resume</span>
           </a>
           <a
-            href="mailto:vaibhavjadhav0301@gmail.com"
+            href="mailto:vaibhavjadhav0391@gmail.com"
             className="inline-flex items-center gap-2 px-6 py-3 rounded-full border border-border bg-card text-foreground font-mono text-xs font-semibold hover:border-accent hover:text-accent transition-all shadow-2xs"
           >
             <Mail size={16} />

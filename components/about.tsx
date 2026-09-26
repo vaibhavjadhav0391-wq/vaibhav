@@ -41,7 +41,7 @@ export function About() {
                 <span>Download Resume</span>
               </a>
               <a
-                href="mailto:vaibhavjadhav0301@gmail.com"
+                href="mailto:vaibhavjadhav0391@gmail.com"
                 className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-border bg-card text-foreground font-mono text-xs font-semibold hover:border-accent hover:text-accent transition-all shadow-2xs"
               >
                 <Mail size={15} />

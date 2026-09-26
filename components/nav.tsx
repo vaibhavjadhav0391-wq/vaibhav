@@ -86,7 +86,7 @@ export function Nav() {
             </a>
 
             <a
-              href="mailto:vaibhavjadhav0301@gmail.com"
+              href="mailto:vaibhavjadhav0391@gmail.com"
               className="hidden sm:inline-flex text-xs font-semibold px-3.5 py-1.5 rounded-full bg-[#e5262c] text-white hover:bg-[#c91e24] transition-colors shadow-xs"
             >
               Get in touch
