@@ -18,6 +18,26 @@ interface LeetCodeStats {
   submissionCalendar: Record<string, number>
 }
 
+// Initial high-fidelity cached activity for instant, zero-delay rendering
+const INITIAL_LEETCODE_CALENDAR: Record<string, number> = {
+  "1783468800": 14, "1783555200": 3, "1783641600": 3, "1783728000": 2, "1783814400": 2,
+  "1783900800": 2, "1783987200": 2, "1784073600": 1, "1784160000": 1, "1784246400": 2,
+  "1784332800": 1, "1784419200": 2, "1784505600": 1, "1784592000": 1, "1784678400": 1,
+  "1784764800": 1, "1784851200": 1, "1784937600": 1, "1785024000": 1, "1785110400": 1,
+  "1785196800": 1, "1785283200": 2, "1785456000": 2, "1785542400": 1, "1785628800": 3,
+  "1785715200": 1, "1785801600": 2, "1785888000": 1, "1785974400": 1, "1786060800": 1,
+  "1786147200": 1, "1786233600": 2, "1786320000": 2, "1786406400": 2, "1786492800": 1,
+  "1786579200": 1, "1786665600": 1, "1786752000": 1, "1786838400": 1, "1786924800": 2,
+  "1787011200": 1, "1787097600": 2, "1787184000": 2, "1787270400": 1, "1787356800": 2,
+  "1787443200": 1, "1787529600": 2, "1787616000": 6, "1787702400": 1, "1787788800": 2,
+  "1787875200": 2, "1787961600": 3, "1788048000": 2, "1788134400": 1, "1788220800": 2,
+  "1788307200": 1, "1788393600": 2, "1788480000": 1, "1788566400": 1, "1788652800": 1,
+  "1788739200": 1, "1788825600": 1, "1788912000": 1, "1788998400": 1, "1789084800": 1,
+  "1789171200": 1, "1789257600": 1, "1789344000": 1, "1789430400": 1, "1789516800": 3,
+  "1789603200": 2, "1789689600": 1, "1789862400": 1, "1789948800": 1, "1790035200": 2,
+  "1790121600": 1, "1790208000": 1, "1790294400": 1
+}
+
 export function Activity() {
   const [ghContributions, setGhContributions] = useState<ContributionDay[]>([])
   const [totalGhContributions, setTotalGhContributions] = useState<number>(293)
@@ -29,9 +49,9 @@ export function Activity() {
     mediumSolved: 39,
     hardSolved: 5,
     ranking: 1750404,
-    submissionCalendar: {},
+    submissionCalendar: INITIAL_LEETCODE_CALENDAR,
   })
-  const [loadingLc, setLoadingLc] = useState<boolean>(true)
+  const [loadingLc, setLoadingLc] = useState<boolean>(false)
   const [activeTooltip, setActiveTooltip] = useState<{ text: string; x: number; y: number } | null>(null)
 
   // Fetch live GitHub contributions
@@ -64,14 +84,20 @@ export function Activity() {
         const res = await fetch("https://alfa-leetcode-api.onrender.com/userProfile/vaibhav032526")
         if (res.ok) {
           const data = await res.json()
-          setLcStats({
-            totalSolved: (data.easySolved || 0) + (data.mediumSolved || 0) + (data.hardSolved || 0) || 95,
-            easySolved: data.easySolved ?? 51,
-            mediumSolved: data.mediumSolved ?? 39,
-            hardSolved: data.hardSolved ?? 5,
-            ranking: data.ranking ?? 1750404,
-            submissionCalendar: data.submissionCalendar || {},
-          })
+          let calendar = data.submissionCalendar
+          if (typeof calendar === "string") {
+            try {
+              calendar = JSON.parse(calendar)
+            } catch {}
+          }
+          setLcStats((prev) => ({
+            totalSolved: (data.easySolved || 0) + (data.mediumSolved || 0) + (data.hardSolved || 0) || prev.totalSolved,
+            easySolved: data.easySolved ?? prev.easySolved,
+            mediumSolved: data.mediumSolved ?? prev.mediumSolved,
+            hardSolved: data.hardSolved ?? prev.hardSolved,
+            ranking: data.ranking ?? prev.ranking,
+            submissionCalendar: calendar && typeof calendar === "object" ? calendar : prev.submissionCalendar,
+          }))
         }
       } catch (err) {
         console.warn("Using cached LeetCode stats:", err)
@@ -82,7 +108,7 @@ export function Activity() {
     fetchLeetCode()
   }, [])
 
-  // Organize GitHub days into weeks (displaying the latest ~26 weeks to fit card width with no scrolling)
+  // Organize GitHub days into weeks (latest 26 weeks for 100% full-width view)
   const ghWeeks = useMemo(() => {
     if (ghContributions.length === 0) return []
     const cols: ContributionDay[][] = []
@@ -95,23 +121,40 @@ export function Activity() {
         currentWeek = []
       }
     })
-    // Slice to show the latest 26 weeks so all recent active commits are 100% visible with ZERO scrolling
     return cols.slice(-26)
   }, [ghContributions])
 
-  // Build LeetCode heatmap grid (latest ~26 weeks for zero scrolling)
+  // Build LeetCode heatmap grid from timestamps
   const lcWeeks = useMemo(() => {
-    const calendar = lcStats.submissionCalendar
+    // 1. Build timestamp -> date string map (UTC based)
+    const dateMap: Record<string, number> = {}
+    let calendar = lcStats.submissionCalendar
+    if (typeof calendar === "string") {
+      try {
+        calendar = JSON.parse(calendar)
+      } catch {}
+    }
+
+    if (calendar && typeof calendar === "object") {
+      Object.entries(calendar).forEach(([tsStr, count]) => {
+        const ts = parseInt(tsStr, 10)
+        if (!isNaN(ts)) {
+          const d = new Date(ts * 1000)
+          const dateKey = d.toISOString().split("T")[0]
+          dateMap[dateKey] = (dateMap[dateKey] || 0) + Number(count)
+        }
+      })
+    }
+
+    // 2. Generate the last 182 days (26 weeks)
     const days: ContributionDay[] = []
     const today = new Date()
 
-    // 26 weeks * 7 = 182 days (approx 6 months up to today)
     for (let i = 181; i >= 0; i--) {
       const d = new Date(today)
       d.setDate(d.getDate() - i)
       const dateStr = d.toISOString().split("T")[0]
-      const timestamp = Math.floor(new Date(dateStr).getTime() / 1000).toString()
-      const count = calendar[timestamp] || 0
+      const count = dateMap[dateStr] || 0
 
       let level = 0
       if (count >= 5) level = 4
@@ -134,7 +177,7 @@ export function Activity() {
     return cols
   }, [lcStats.submissionCalendar])
 
-  // GitHub Cell Colors
+  // GitHub Cell Colors (Emerald)
   const getGhCellColor = (level: number) => {
     switch (level) {
       case 1:
@@ -150,7 +193,7 @@ export function Activity() {
     }
   }
 
-  // LeetCode Cell Colors
+  // LeetCode Cell Colors (Amber/Gold with High Visibility)
   const getLcCellColor = (level: number) => {
     switch (level) {
       case 1:
@@ -234,7 +277,7 @@ export function Activity() {
                 </span>
               </div>
 
-              {/* Heatmap Grid View - Full Width, No Horizontal Scroll Needed */}
+              {/* Heatmap Grid View - Full Width, No Horizontal Scroll */}
               <div className="w-full pb-3 pt-1">
                 {loadingGh && ghWeeks.length === 0 ? (
                   <div className="h-28 flex items-center justify-center text-xs font-mono text-neutral-400">
@@ -269,7 +312,7 @@ export function Activity() {
 
               {/* Legend */}
               <div className="flex items-center justify-between pt-4 mt-2 border-t border-white/10 text-xs font-mono font-medium text-neutral-300">
-                <span className="text-neutral-300 font-semibold">Recent Active Months</span>
+                <span className="text-neutral-300 font-semibold">Annual Commit Cadence</span>
                 <div className="flex items-center gap-1.5">
                   <span className="text-neutral-400 text-[11px]">Less</span>
                   <div className="w-[10px] h-[10px] rounded-[2px] bg-white/[0.08]" />
@@ -330,37 +373,45 @@ export function Activity() {
                 </div>
               </div>
 
-              {/* LeetCode Heatmap Grid View - Full Width, No Horizontal Scroll Needed */}
-              <div className="w-full pb-3 pt-1 mb-4">
-                {loadingLc && lcWeeks.length === 0 ? (
-                  <div className="h-28 flex items-center justify-center text-xs font-mono text-neutral-400">
-                    Syncing live LeetCode timeline...
-                  </div>
-                ) : (
-                  <div className="flex justify-between gap-[3px] sm:gap-[4px] w-full">
-                    {lcWeeks.map((week, wIdx) => (
-                      <div key={wIdx} className="flex flex-col gap-[3px] sm:gap-[4px] flex-1">
-                        {week.map((day) => (
-                          <div
-                            key={day.date}
-                            className={`aspect-square w-full rounded-[2.5px] cursor-pointer transition-all hover:scale-135 ${getLcCellColor(
-                              day.level
-                            )}`}
-                            onMouseEnter={(e) => {
-                              const rect = e.currentTarget.getBoundingClientRect()
-                              setActiveTooltip({
-                                text: `${day.count} LeetCode submission${day.count === 1 ? "" : "s"} on ${day.date}`,
-                                x: rect.left + rect.width / 2,
-                                y: rect.top - 10,
-                              })
-                            }}
-                            onMouseLeave={() => setActiveTooltip(null)}
-                          />
-                        ))}
-                      </div>
-                    ))}
-                  </div>
-                )}
+              {/* LeetCode Heatmap Grid View - Full Width, Glowing Active Submissions */}
+              <div className="w-full pb-3 pt-1">
+                <div className="flex justify-between gap-[3px] sm:gap-[4px] w-full">
+                  {lcWeeks.map((week, wIdx) => (
+                    <div key={wIdx} className="flex flex-col gap-[3px] sm:gap-[4px] flex-1">
+                      {week.map((day) => (
+                        <div
+                          key={day.date}
+                          className={`aspect-square w-full rounded-[2.5px] cursor-pointer transition-all hover:scale-135 ${getLcCellColor(
+                            day.level
+                          )}`}
+                          onMouseEnter={(e) => {
+                            const rect = e.currentTarget.getBoundingClientRect()
+                            setActiveTooltip({
+                              text: `${day.count} LeetCode submission${day.count === 1 ? "" : "s"} on ${day.date}`,
+                              x: rect.left + rect.width / 2,
+                              y: rect.top - 10,
+                            })
+                          }}
+                          onMouseLeave={() => setActiveTooltip(null)}
+                        />
+                      ))}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* LeetCode Legend & Cadence Footer */}
+              <div className="flex items-center justify-between pt-4 mt-2 border-t border-white/10 text-xs font-mono font-medium text-neutral-300 mb-4">
+                <span className="text-neutral-300 font-semibold">Active Submissions</span>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-neutral-400 text-[11px]">Less</span>
+                  <div className="w-[10px] h-[10px] rounded-[2px] bg-white/[0.08]" />
+                  <div className="w-[10px] h-[10px] rounded-[2px] bg-amber-800" />
+                  <div className="w-[10px] h-[10px] rounded-[2px] bg-amber-600" />
+                  <div className="w-[10px] h-[10px] rounded-[2px] bg-amber-400" />
+                  <div className="w-[10px] h-[10px] rounded-[2px] bg-amber-300" />
+                  <span className="text-neutral-400 text-[11px]">More</span>
+                </div>
               </div>
 
               {/* Problem Breakdown Meter */}
