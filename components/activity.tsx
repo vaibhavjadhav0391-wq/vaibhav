@@ -15,6 +15,7 @@ interface LeetCodeStats {
   mediumSolved: number
   hardSolved: number
   ranking: number
+  submissionCalendar: Record<string, number>
   recentSubmissions: { title: string; statusDisplay: string; lang: string }[]
 }
 
@@ -29,6 +30,7 @@ export function Activity() {
     mediumSolved: 39,
     hardSolved: 5,
     ranking: 1750404,
+    submissionCalendar: {},
     recentSubmissions: [
       { title: "Search in Rotated Sorted Array", statusDisplay: "Accepted", lang: "java" },
       { title: "Sqrt(x)", statusDisplay: "Accepted", lang: "java" },
@@ -74,6 +76,7 @@ export function Activity() {
             mediumSolved: data.mediumSolved ?? 39,
             hardSolved: data.hardSolved ?? 5,
             ranking: data.ranking ?? 1750404,
+            submissionCalendar: data.submissionCalendar || {},
             recentSubmissions: (data.recentSubmissions || []).slice(0, 3),
           })
         }
@@ -86,8 +89,8 @@ export function Activity() {
     fetchLeetCode()
   }, [])
 
-  // Organize GitHub days into weeks (52-53 columns, 7 rows)
-  const weeks = useMemo(() => {
+  // Organize GitHub days into weeks
+  const ghWeeks = useMemo(() => {
     if (ghContributions.length === 0) return []
     const cols: ContributionDay[][] = []
     let currentWeek: ContributionDay[] = []
@@ -102,58 +105,108 @@ export function Activity() {
     return cols
   }, [ghContributions])
 
-  // Color mapping based on level (matching portfolio emerald & theme)
-  const getCellColor = (level: number) => {
+  // Build LeetCode 52-week heatmap grid from submissionCalendar
+  const lcWeeks = useMemo(() => {
+    const calendar = lcStats.submissionCalendar
+    const days: ContributionDay[] = []
+    const today = new Date()
+
+    for (let i = 370; i >= 0; i--) {
+      const d = new Date(today)
+      d.setDate(d.getDate() - i)
+      const dateStr = d.toISOString().split("T")[0]
+      const timestamp = Math.floor(new Date(dateStr).getTime() / 1000).toString()
+      const count = calendar[timestamp] || 0
+
+      let level = 0
+      if (count >= 5) level = 4
+      else if (count >= 3) level = 3
+      else if (count >= 2) level = 2
+      else if (count >= 1) level = 1
+
+      days.push({ date: dateStr, count, level })
+    }
+
+    const cols: ContributionDay[][] = []
+    let currentWeek: ContributionDay[] = []
+    days.forEach((day, index) => {
+      currentWeek.push(day)
+      if (currentWeek.length === 7 || index === days.length - 1) {
+        cols.push(currentWeek)
+        currentWeek = []
+      }
+    })
+    return cols
+  }, [lcStats.submissionCalendar])
+
+  // GitHub Cell Colors (Emerald)
+  const getGhCellColor = (level: number) => {
     switch (level) {
       case 1:
-        return "bg-emerald-950/40 dark:bg-emerald-950/60 border border-emerald-800/40"
+        return "bg-emerald-300 dark:bg-emerald-950/80 border border-emerald-500/40"
       case 2:
-        return "bg-emerald-700 dark:bg-emerald-700"
+        return "bg-emerald-500 dark:bg-emerald-700"
       case 3:
-        return "bg-emerald-500 dark:bg-emerald-500"
+        return "bg-emerald-600 dark:bg-emerald-500"
       case 4:
-        return "bg-emerald-400 dark:bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.4)]"
+        return "bg-emerald-700 dark:bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.6)]"
       default:
-        return "bg-[#141414]/5 dark:bg-white/[0.04] border border-[#141414]/5 dark:border-white/[0.03]"
+        return "bg-[#141414]/10 dark:bg-white/[0.06] border border-[#141414]/5 dark:border-white/[0.04]"
+    }
+  }
+
+  // LeetCode Cell Colors (Amber/Orange)
+  const getLcCellColor = (level: number) => {
+    switch (level) {
+      case 1:
+        return "bg-amber-300 dark:bg-amber-950/80 border border-amber-500/40"
+      case 2:
+        return "bg-amber-500 dark:bg-amber-700"
+      case 3:
+        return "bg-amber-600 dark:bg-amber-500"
+      case 4:
+        return "bg-amber-700 dark:bg-amber-400 shadow-[0_0_6px_rgba(251,191,36,0.6)]"
+      default:
+        return "bg-[#141414]/10 dark:bg-white/[0.06] border border-[#141414]/5 dark:border-white/[0.04]"
     }
   }
 
   return (
-    <section id="activity" className="py-24 relative overflow-hidden">
+    <section id="activity" className="py-24 relative overflow-hidden bg-transparent">
       <div className="container mx-auto px-[max(4vw,1.5rem)] max-w-[1200px]">
-        {/* Section Header */}
+        {/* Section Header with High Contrast */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-12 gap-4">
           <div>
-            <div className="flex items-center gap-2 text-xs font-mono tracking-widest text-[#e5262c] uppercase font-semibold mb-2">
-              <Flame size={14} className="animate-pulse" />
+            <div className="flex items-center gap-2 text-xs font-mono tracking-widest text-[#e5262c] uppercase font-bold mb-2">
+              <Flame size={15} className="animate-pulse text-[#e5262c]" />
               <span>Continuous Output</span>
             </div>
-            <h2 className="font-serif text-3xl sm:text-4xl text-[#141414] dark:text-white font-normal">
+            <h2 className="font-serif text-3xl sm:text-4xl text-[#141414] dark:text-[#f6f4f0] font-normal tracking-tight">
               Activity &amp; Contributions
             </h2>
           </div>
-          <p className="text-sm text-[#141414]/60 dark:text-neutral-400 max-w-md font-mono text-xs">
+          <p className="text-xs sm:text-sm text-[#141414]/75 dark:text-neutral-400 max-w-md font-mono">
             Live-synced daily commits, problem-solving streaks, and algorithmic milestones.
           </p>
         </div>
 
         {/* Dashboard Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* GitHub Card (7 Cols) */}
-          <div className="lg:col-span-7 rounded-2xl border border-[#141414]/10 dark:border-white/10 bg-[#f6f4f0]/60 dark:bg-[#16161a]/60 backdrop-blur-md p-6 sm:p-7 flex flex-col justify-between shadow-sm">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* GitHub Card */}
+          <div className="rounded-2xl border border-[#141414]/15 dark:border-white/10 bg-white dark:bg-[#16161a] p-6 sm:p-8 flex flex-col justify-between shadow-md transition-colors">
             <div>
-              {/* Card Header */}
+              {/* Header */}
               <div className="flex items-center justify-between mb-6 pb-4 border-b border-[#141414]/10 dark:border-white/10">
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-[#141414] dark:bg-white text-white dark:text-[#141414] flex items-center justify-center font-bold">
-                    <GitCommit size={18} />
+                  <div className="w-10 h-10 rounded-xl bg-[#141414] dark:bg-white text-white dark:text-[#141414] flex items-center justify-center font-bold shadow-xs">
+                    <GitCommit size={20} />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-sm sm:text-base text-[#141414] dark:text-white flex items-center gap-2">
+                    <h3 className="font-bold text-base text-[#141414] dark:text-white flex items-center gap-2">
                       GitHub Activity
                       <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
                     </h3>
-                    <p className="text-xs text-[#141414]/50 dark:text-neutral-400 font-mono">@vaibhavjadhav0391-wq</p>
+                    <p className="text-xs text-[#141414]/60 dark:text-neutral-400 font-mono font-medium">@vaibhavjadhav0391-wq</p>
                   </div>
                 </div>
 
@@ -161,7 +214,7 @@ export function Activity() {
                   href="https://github.com/vaibhavjadhav0391-wq"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 text-xs font-mono font-medium text-[#141414]/70 dark:text-neutral-300 hover:text-[#e5262c] dark:hover:text-[#e5262c] transition-colors"
+                  className="flex items-center gap-1.5 text-xs font-mono font-semibold px-3 py-1.5 rounded-full border border-[#141414]/15 dark:border-white/15 text-[#141414] dark:text-neutral-200 hover:border-[#e5262c] hover:text-[#e5262c] transition-all bg-[#141414]/[0.02] dark:bg-white/[0.02]"
                 >
                   <span>Profile</span>
                   <ExternalLink size={13} />
@@ -173,25 +226,25 @@ export function Activity() {
                 <span className="text-3xl sm:text-4xl font-bold font-serif text-[#141414] dark:text-white">
                   {totalGhContributions}
                 </span>
-                <span className="text-xs sm:text-sm text-[#141414]/60 dark:text-neutral-400 font-mono">
+                <span className="text-xs sm:text-sm text-[#141414]/75 dark:text-neutral-400 font-mono font-medium">
                   contributions in the last year
                 </span>
               </div>
 
               {/* Heatmap Grid View */}
-              <div className="relative overflow-x-auto pb-2 scrollbar-thin">
-                {loadingGh && weeks.length === 0 ? (
-                  <div className="h-28 flex items-center justify-center text-xs font-mono text-[#141414]/40 dark:text-neutral-500">
+              <div className="relative overflow-x-auto pb-3 pt-1 scrollbar-thin">
+                {loadingGh && ghWeeks.length === 0 ? (
+                  <div className="h-28 flex items-center justify-center text-xs font-mono text-[#141414]/50 dark:text-neutral-500">
                     Syncing live GitHub timeline...
                   </div>
                 ) : (
-                  <div className="flex gap-[3.5px] min-w-[620px]">
-                    {weeks.map((week, wIdx) => (
+                  <div className="flex gap-[3.5px] min-w-[580px]">
+                    {ghWeeks.map((week, wIdx) => (
                       <div key={wIdx} className="flex flex-col gap-[3.5px]">
                         {week.map((day) => (
                           <div
                             key={day.date}
-                            className={`w-[10px] h-[10px] rounded-[2px] cursor-pointer transition-all hover:scale-125 ${getCellColor(
+                            className={`w-[10px] h-[10px] rounded-[2px] cursor-pointer transition-all hover:scale-130 ${getGhCellColor(
                               day.level
                             )}`}
                             onMouseEnter={(e) => {
@@ -211,36 +264,37 @@ export function Activity() {
                 )}
               </div>
 
-              {/* Heatmap Legend */}
-              <div className="flex items-center justify-between pt-4 mt-2 text-[11px] font-mono text-[#141414]/50 dark:text-neutral-400">
-                <span>Learn how contributions are counted</span>
+              {/* Legend */}
+              <div className="flex items-center justify-between pt-4 mt-1 border-t border-[#141414]/10 dark:border-white/10 text-[11px] font-mono font-medium text-[#141414]/60 dark:text-neutral-400">
+                <span>Annual Commit Cadence</span>
                 <div className="flex items-center gap-1.5">
                   <span>Less</span>
-                  <div className="w-[9px] h-[9px] rounded-[2px] bg-[#141414]/5 dark:bg-white/[0.04]" />
-                  <div className="w-[9px] h-[9px] rounded-[2px] bg-emerald-950/40 dark:bg-emerald-950/60" />
-                  <div className="w-[9px] h-[9px] rounded-[2px] bg-emerald-700" />
-                  <div className="w-[9px] h-[9px] rounded-[2px] bg-emerald-500" />
-                  <div className="w-[9px] h-[9px] rounded-[2px] bg-emerald-400" />
+                  <div className="w-[9px] h-[9px] rounded-[2px] bg-[#141414]/10 dark:bg-white/[0.06]" />
+                  <div className="w-[9px] h-[9px] rounded-[2px] bg-emerald-300 dark:bg-emerald-950/80" />
+                  <div className="w-[9px] h-[9px] rounded-[2px] bg-emerald-500 dark:bg-emerald-700" />
+                  <div className="w-[9px] h-[9px] rounded-[2px] bg-emerald-600 dark:bg-emerald-500" />
+                  <div className="w-[9px] h-[9px] rounded-[2px] bg-emerald-700 dark:bg-emerald-400" />
                   <span>More</span>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* LeetCode Card (5 Cols) */}
-          <div className="lg:col-span-5 rounded-2xl border border-[#141414]/10 dark:border-white/10 bg-[#f6f4f0]/60 dark:bg-[#16161a]/60 backdrop-blur-md p-6 sm:p-7 flex flex-col justify-between shadow-sm">
+          {/* LeetCode Card (With Matching Heatmap) */}
+          <div className="rounded-2xl border border-[#141414]/15 dark:border-white/10 bg-white dark:bg-[#16161a] p-6 sm:p-8 flex flex-col justify-between shadow-md transition-colors">
             <div>
-              {/* Card Header */}
+              {/* Header */}
               <div className="flex items-center justify-between mb-6 pb-4 border-b border-[#141414]/10 dark:border-white/10">
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-500 border border-amber-500/20 flex items-center justify-center font-bold">
-                    <Code2 size={18} />
+                  <div className="w-10 h-10 rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30 flex items-center justify-center font-bold shadow-xs">
+                    <Code2 size={20} />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-sm sm:text-base text-[#141414] dark:text-white flex items-center gap-2">
+                    <h3 className="font-bold text-base text-[#141414] dark:text-white flex items-center gap-2">
                       LeetCode Progress
+                      <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
                     </h3>
-                    <p className="text-xs text-[#141414]/50 dark:text-neutral-400 font-mono">@vaibhav032526</p>
+                    <p className="text-xs text-[#141414]/60 dark:text-neutral-400 font-mono font-medium">@vaibhav032526</p>
                   </div>
                 </div>
 
@@ -248,94 +302,80 @@ export function Activity() {
                   href="https://leetcode.com/u/vaibhav032526/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 text-xs font-mono font-medium text-[#141414]/70 dark:text-neutral-300 hover:text-amber-500 dark:hover:text-amber-400 transition-colors"
+                  className="flex items-center gap-1.5 text-xs font-mono font-semibold px-3 py-1.5 rounded-full border border-[#141414]/15 dark:border-white/15 text-[#141414] dark:text-neutral-200 hover:border-amber-500 hover:text-amber-500 transition-all bg-[#141414]/[0.02] dark:bg-white/[0.02]"
                 >
                   <span>Profile</span>
                   <ExternalLink size={13} />
                 </a>
               </div>
 
-              {/* Total Solved Metric */}
+              {/* Total Solved & Rank */}
               <div className="flex items-center justify-between mb-6">
                 <div>
                   <span className="text-3xl sm:text-4xl font-bold font-serif text-[#141414] dark:text-white">
                     {lcStats.totalSolved}
                   </span>
-                  <span className="block text-xs text-[#141414]/60 dark:text-neutral-400 font-mono mt-0.5">
+                  <span className="block text-xs sm:text-sm text-[#141414]/75 dark:text-neutral-400 font-mono font-medium mt-0.5">
                     Problems Solved
                   </span>
                 </div>
-                <div className="px-3 py-1.5 rounded-full border border-amber-500/20 bg-amber-500/5 text-amber-600 dark:text-amber-400 text-xs font-mono font-semibold flex items-center gap-1.5">
-                  <Trophy size={13} />
+                <div className="px-3.5 py-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-300 text-xs font-mono font-bold flex items-center gap-1.5 shadow-xs">
+                  <Trophy size={14} className="text-amber-500" />
                   <span>Rank ~{Math.round(lcStats.ranking / 1000)}k</span>
                 </div>
               </div>
 
-              {/* Problem Breakdown Bars */}
-              <div className="space-y-3 mb-6">
+              {/* LeetCode Heatmap Grid View */}
+              <div className="relative overflow-x-auto pb-3 pt-1 scrollbar-thin mb-4">
+                {loadingLc && lcWeeks.length === 0 ? (
+                  <div className="h-28 flex items-center justify-center text-xs font-mono text-[#141414]/50 dark:text-neutral-500">
+                    Syncing live LeetCode timeline...
+                  </div>
+                ) : (
+                  <div className="flex gap-[3.5px] min-w-[580px]">
+                    {lcWeeks.map((week, wIdx) => (
+                      <div key={wIdx} className="flex flex-col gap-[3.5px]">
+                        {week.map((day) => (
+                          <div
+                            key={day.date}
+                            className={`w-[10px] h-[10px] rounded-[2px] cursor-pointer transition-all hover:scale-130 ${getLcCellColor(
+                              day.level
+                            )}`}
+                            onMouseEnter={(e) => {
+                              const rect = e.currentTarget.getBoundingClientRect()
+                              setActiveTooltip({
+                                text: `${day.count} LeetCode submission${day.count === 1 ? "" : "s"} on ${day.date}`,
+                                x: rect.left + rect.width / 2,
+                                y: rect.top - 8,
+                              })
+                            }}
+                            onMouseLeave={() => setActiveTooltip(null)}
+                          />
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Problem Breakdown Meter */}
+              <div className="grid grid-cols-3 gap-3 pt-4 border-t border-[#141414]/10 dark:border-white/10">
                 {/* Easy */}
-                <div>
-                  <div className="flex justify-between text-xs font-mono mb-1">
-                    <span className="text-emerald-600 dark:text-emerald-400 font-semibold">Easy</span>
-                    <span className="text-[#141414]/70 dark:text-neutral-300">{lcStats.easySolved}</span>
-                  </div>
-                  <div className="h-2 w-full bg-[#141414]/5 dark:bg-white/5 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-emerald-500 rounded-full transition-all duration-500"
-                      style={{ width: `${Math.min(100, (lcStats.easySolved / 70) * 100)}%` }}
-                    />
-                  </div>
+                <div className="p-2.5 rounded-xl bg-[#141414]/[0.03] dark:bg-white/[0.03] border border-[#141414]/5 dark:border-white/5 text-center">
+                  <span className="text-[11px] font-mono font-bold text-emerald-600 dark:text-emerald-400 block uppercase">Easy</span>
+                  <span className="text-lg font-bold font-serif text-[#141414] dark:text-white">{lcStats.easySolved}</span>
                 </div>
 
                 {/* Medium */}
-                <div>
-                  <div className="flex justify-between text-xs font-mono mb-1">
-                    <span className="text-amber-600 dark:text-amber-400 font-semibold">Medium</span>
-                    <span className="text-[#141414]/70 dark:text-neutral-300">{lcStats.mediumSolved}</span>
-                  </div>
-                  <div className="h-2 w-full bg-[#141414]/5 dark:bg-white/5 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-amber-500 rounded-full transition-all duration-500"
-                      style={{ width: `${Math.min(100, (lcStats.mediumSolved / 50) * 100)}%` }}
-                    />
-                  </div>
+                <div className="p-2.5 rounded-xl bg-[#141414]/[0.03] dark:bg-white/[0.03] border border-[#141414]/5 dark:border-white/5 text-center">
+                  <span className="text-[11px] font-mono font-bold text-amber-600 dark:text-amber-400 block uppercase">Medium</span>
+                  <span className="text-lg font-bold font-serif text-[#141414] dark:text-white">{lcStats.mediumSolved}</span>
                 </div>
 
                 {/* Hard */}
-                <div>
-                  <div className="flex justify-between text-xs font-mono mb-1">
-                    <span className="text-[#e5262c] font-semibold">Hard</span>
-                    <span className="text-[#141414]/70 dark:text-neutral-300">{lcStats.hardSolved}</span>
-                  </div>
-                  <div className="h-2 w-full bg-[#141414]/5 dark:bg-white/5 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-[#e5262c] rounded-full transition-all duration-500"
-                      style={{ width: `${Math.min(100, (lcStats.hardSolved / 15) * 100)}%` }}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Recent Solved Highlights */}
-              <div>
-                <p className="text-[11px] font-mono uppercase tracking-wider text-[#141414]/40 dark:text-neutral-500 mb-2 font-semibold">
-                  Recent Submissions
-                </p>
-                <div className="space-y-1.5">
-                  {lcStats.recentSubmissions.map((sub, idx) => (
-                    <div
-                      key={idx}
-                      className="flex items-center justify-between text-xs p-2 rounded-lg bg-white/40 dark:bg-white/[0.02] border border-[#141414]/5 dark:border-white/[0.04]"
-                    >
-                      <div className="flex items-center gap-2 truncate pr-2">
-                        <CheckCircle2 size={13} className="text-emerald-500 shrink-0" />
-                        <span className="truncate text-[#141414]/90 dark:text-neutral-200">{sub.title}</span>
-                      </div>
-                      <span className="text-[10px] font-mono uppercase px-1.5 py-0.5 rounded bg-[#141414]/5 dark:bg-white/5 text-[#141414]/60 dark:text-neutral-400">
-                        {sub.lang}
-                      </span>
-                    </div>
-                  ))}
+                <div className="p-2.5 rounded-xl bg-[#141414]/[0.03] dark:bg-white/[0.03] border border-[#141414]/5 dark:border-white/5 text-center">
+                  <span className="text-[11px] font-mono font-bold text-[#e5262c] block uppercase">Hard</span>
+                  <span className="text-lg font-bold font-serif text-[#141414] dark:text-white">{lcStats.hardSolved}</span>
                 </div>
               </div>
             </div>
@@ -346,7 +386,7 @@ export function Activity() {
       {/* Floating Tooltip */}
       {activeTooltip && (
         <div
-          className="fixed pointer-events-none z-50 px-2.5 py-1 text-[11px] font-mono font-medium rounded-md bg-[#141414] text-white dark:bg-white dark:text-[#141414] shadow-lg -translate-x-1/2 -translate-y-full"
+          className="fixed pointer-events-none z-50 px-3 py-1.5 text-xs font-mono font-semibold rounded-md bg-[#141414] text-white dark:bg-white dark:text-[#141414] shadow-xl -translate-x-1/2 -translate-y-full border border-white/20 dark:border-black/20"
           style={{ left: `${activeTooltip.x}px`, top: `${activeTooltip.y}px` }}
         >
           {activeTooltip.text}
