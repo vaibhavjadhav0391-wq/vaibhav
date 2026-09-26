@@ -38,8 +38,8 @@ export function Nav() {
         <div
           className={`pointer-events-auto flex items-center justify-between px-5 py-3 rounded-full transition-all duration-300 ${
             scrolled
-              ? "bg-[#f6f4f0]/85 dark:bg-[#121214]/85 backdrop-blur-md border border-[#141414]/10 dark:border-white/10 shadow-sm"
-              : "bg-[#f6f4f0]/50 dark:bg-[#121214]/50 backdrop-blur-sm border border-transparent"
+              ? "bg-[#f6f4f0]/90 dark:bg-[#121214]/90 backdrop-blur-md border border-[#141414]/10 dark:border-white/10 shadow-sm"
+              : "bg-[#f6f4f0]/60 dark:bg-[#121214]/60 backdrop-blur-sm border border-transparent"
           }`}
         >
           {/* Logo / Name */}
@@ -48,7 +48,10 @@ export function Nav() {
             className="flex items-center gap-2 group tracking-tight"
             aria-label="Home"
           >
-            <span className="font-serif font-bold text-base sm:text-lg text-[#141414] dark:text-[#f6f4f0] transition-colors">
+            <span
+              className="font-serif font-bold text-base sm:text-lg transition-colors"
+              style={{ color: "var(--foreground)" }}
+            >
               Vaibhav Jadhav
             </span>
             <span className="w-1.5 h-1.5 rounded-full bg-[#e5262c] group-hover:scale-125 transition-transform" />
@@ -60,7 +63,8 @@ export function Nav() {
               <a
                 key={link.href}
                 href={link.href}
-                className="text-xs uppercase tracking-[0.14em] font-medium text-[#141414]/70 dark:text-[#f6f4f0]/70 hover:text-[#e5262c] dark:hover:text-[#e5262c] transition-colors"
+                className="text-xs uppercase tracking-[0.14em] font-medium opacity-80 hover:opacity-100 hover:text-[#e5262c] transition-colors"
+                style={{ color: "var(--foreground)" }}
               >
                 {link.label}
               </a>
@@ -72,15 +76,18 @@ export function Nav() {
             <a
               href="/Vaibhav_Jadhav_Resume.docx"
               download="Vaibhav_Jadhav_Resume.docx"
-              className="inline-flex items-center gap-1.5 text-xs font-semibold px-3.5 py-1.5 rounded-full border border-[#141414]/15 dark:border-white/15 bg-white/70 dark:bg-[#1c1c20] text-[#141414] dark:text-[#f6f4f0] hover:border-[#e5262c] hover:text-[#e5262c] transition-all shadow-2xs group"
+              className="inline-flex items-center gap-1.5 text-xs font-mono font-bold px-3.5 py-1.5 rounded-full border border-border bg-card shadow-2xs hover:border-[#e5262c] hover:bg-[#e5262c]/10 transition-all group"
+              style={{ color: "var(--foreground)" }}
             >
               <FileDown size={14} className="text-[#e5262c] group-hover:-translate-y-0.5 transition-transform" />
-              <span>Resume</span>
+              <span style={{ color: "var(--foreground)" }} className="group-hover:text-[#e5262c]">
+                Resume
+              </span>
             </a>
 
             <a
               href="mailto:vaibhavjadhav0301@gmail.com"
-              className="hidden sm:inline-flex text-xs font-semibold px-3 py-1.5 rounded-full bg-[#e5262c] text-white hover:bg-[#c91e24] transition-colors shadow-xs"
+              className="hidden sm:inline-flex text-xs font-semibold px-3.5 py-1.5 rounded-full bg-[#e5262c] text-white hover:bg-[#c91e24] transition-colors shadow-xs"
             >
               Get in touch
             </a>
@@ -89,7 +96,8 @@ export function Nav() {
               type="button"
               onClick={toggleTheme}
               aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
-              className="p-2 rounded-full border border-[#141414]/10 dark:border-white/10 bg-white/50 dark:bg-white/5 text-[#141414] dark:text-[#f6f4f0] hover:border-[#e5262c] hover:text-[#e5262c] transition-all cursor-pointer"
+              className="p-2 rounded-full border border-border bg-card hover:border-[#e5262c] hover:text-[#e5262c] transition-all cursor-pointer"
+              style={{ color: "var(--foreground)" }}
             >
               {mounted ? (
                 isDark ? (
