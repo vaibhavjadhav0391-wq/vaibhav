@@ -56,7 +56,7 @@ export function solve(pts: Pt[], links: Link[], iterations: number) {
 }
 
 export function spinStep(s: Spin, target: number, dt: number, drive: number) {
-  s.v += (-(s.a - target) * 22 - s.v * 3.8 + drive) * dt
+  s.v += (-(s.a - target) * 28 - s.v * 4.5 + drive) * dt
   s.a += s.v * dt
 }
 
@@ -170,6 +170,7 @@ export default function LanyardBadge({
       return pts.length - 1
     }
 
+    // High segment count (14 segments) and generous slack for silky, natural soft fabric curves
     const strand = (from: number, to: number, n: number, slack: number) => {
       const a = pts[from]
       const b = pts[to]
@@ -202,24 +203,25 @@ export default function LanyardBadge({
       right.length = 0
       low.length = 0
 
-      const anchorSpan = Math.max(cw * 0.75, W * 0.35)
-      const aL = add(W / 2 - anchorSpan / 2, -2, 0)
-      const aR = add(W / 2 + anchorSpan / 2, -2, 0)
+      const anchorSpan = Math.max(cw * 0.8, W * 0.38)
+      const aL = add(W / 2 - anchorSpan / 2, -4, 0)
+      const aR = add(W / 2 + anchorSpan / 2, -4, 0)
 
-      // Keep buckle and ring higher up so full card is 100% visible inside container
-      const bY = 50
-      const bL = add(W / 2 - cw * 0.04, bY, 0.4)
-      const bR = add(W / 2 + cw * 0.04, bY, 0.4)
+      // Soft natural hang height
+      const bY = 55
+      const bL = add(W / 2 - cw * 0.04, bY, 0.5)
+      const bR = add(W / 2 + cw * 0.04, bY, 0.5)
       const buckleRest = Math.hypot(pts[bR].x - pts[bL].x, pts[bR].y - pts[bL].y)
       links.push([bL, bR, buckleRest])
 
-      const sL = strand(aL, bL, 7, 1.02)
-      const sR = strand(aR, bR, 7, 1.02)
+      // 14 silky smooth segments per strand with 1.08 natural slack
+      const sL = strand(aL, bL, 14, 1.08)
+      const sR = strand(aR, bR, 14, 1.08)
       left.push(...sL.list)
       right.push(...sR.list)
       strandRest = sL.rest
 
-      const rY = bY + 16
+      const rY = bY + 18
       iT = add(W / 2, rY, 0.8)
       links.push([bL, iT, Math.hypot(pts[iT].x - pts[bL].x, pts[iT].y - pts[bL].y)])
       links.push([bR, iT, Math.hypot(pts[iT].x - pts[bR].x, pts[iT].y - pts[bR].y)])
@@ -227,9 +229,9 @@ export default function LanyardBadge({
       iC = add(W / 2, rY + ch * 0.5, 1)
       links.push([iT, iC, ch * 0.5])
 
-      const sLow = strand(bL, iT, 3, 1.0)
+      const sLow = strand(bL, iT, 5, 1.02)
       low.push(...sLow.list)
-      lowLen = sLow.rest * 3
+      lowLen = sLow.rest * 5
 
       const Wt = Math.max(16, Math.round(cw * 0.09)) * dpr
       const Ht = 340 * dpr
@@ -242,7 +244,7 @@ export default function LanyardBadge({
         x.fillStyle = look.current.strapColor || "#141414"
         x.fillRect(0, 0, Wt, Ht)
 
-        // Bold red side rails
+        // Red side rails
         x.fillStyle = look.current.inkColor || "#e5262c"
         x.fillRect(0, 0, Math.max(2, Wt * 0.12), Ht)
         x.fillRect(Wt - Math.max(2, Wt * 0.12), 0, Math.max(2, Wt * 0.12), Ht)
@@ -385,14 +387,22 @@ export default function LanyardBadge({
       }
     }
 
-    let drag: { id: number; ox: number; oy: number; tx: number; ty: number } | null = null
+    const flipTarget = () => {
+      const next = !backRef.current
+      backRef.current = next
+      spinTarget = next ? Math.PI : 0
+    }
+    flipRef.current = flipTarget
+
+    let drag: { id: number; ox: number; oy: number; tx: number; ty: number; moved: boolean } | null = null
     const onDown = (e: PointerEvent) => {
-      e.preventDefault()
       const rect = root.getBoundingClientRect()
       const x = e.clientX - rect.left
       const y = e.clientY - rect.top
-      drag = { id: e.pointerId, ox: x, oy: y, tx: x, ty: y }
-      card.setPointerCapture(e.pointerId)
+      drag = { id: e.pointerId, ox: x, oy: y, tx: x, ty: y, moved: false }
+      try {
+        card.setPointerCapture(e.pointerId)
+      } catch {}
       card.style.cursor = "grabbing"
     }
 
@@ -401,17 +411,21 @@ export default function LanyardBadge({
       const rect = root.getBoundingClientRect()
       drag.tx = e.clientX - rect.left
       drag.ty = e.clientY - rect.top
+      if (Math.hypot(drag.tx - drag.ox, drag.ty - drag.oy) > 8) {
+        drag.moved = true
+      }
     }
 
     const onUp = (e: PointerEvent) => {
       if (!drag || drag.id !== e.pointerId) return
-      const moved = Math.hypot(drag.tx - drag.ox, drag.ty - drag.oy)
+      const wasMoved = drag.moved
       drag = null
       try {
         card.releasePointerCapture(e.pointerId)
       } catch {}
       card.style.cursor = "grab"
-      if (moved < 6) {
+      // If clicked/tapped without heavy drag, flip the card immediately!
+      if (!wasMoved) {
         flipTarget()
       }
     }
@@ -421,19 +435,12 @@ export default function LanyardBadge({
     card.addEventListener("pointerup", onUp)
     card.addEventListener("pointercancel", onUp)
 
-    const flipTarget = () => {
-      const next = !backRef.current
-      backRef.current = next
-      spinTarget = next ? Math.PI : 0
-    }
-    flipRef.current = flipTarget
-
     let raf = 0
     let lastT = performance.now()
     let acc = 0
     const STEP = 1 / 120
-    const GRAVITY = 1800
-    const ITER = 14
+    const GRAVITY = 1200 // Softer gravity for natural fabric swing
+    const ITER = 8 // Softer constraint iterations for flexible ribbon feel
     let t = 0
 
     const tick = (now: number) => {
@@ -454,12 +461,12 @@ export default function LanyardBadge({
         }
         const C = pts[iC]
         if (!reduced && !drag) {
-          C.x += (16 * Math.sin(t * 0.6) + 8 * Math.sin(t * 1.7)) * STEP * STEP
+          C.x += (14 * Math.sin(t * 0.5) + 6 * Math.sin(t * 1.4)) * STEP * STEP
         }
-        integrate(pts, STEP, GRAVITY, 0.992)
+        integrate(pts, STEP, GRAVITY, 0.994) // Silky smooth damping
         solve(pts, links, ITER)
         const vx = (C.x - C.px) / STEP
-        spinStep(spin, spinTarget, STEP, vx * 0.03 + (reduced ? 0 : 0.5 * Math.sin(t * 0.5)))
+        spinStep(spin, spinTarget, STEP, vx * 0.03 + (reduced ? 0 : 0.4 * Math.sin(t * 0.5)))
       }
       draw()
       place()
@@ -497,6 +504,7 @@ export default function LanyardBadge({
     backfaceVisibility: "hidden",
     WebkitBackfaceVisibility: "hidden",
     boxShadow: "0 22px 50px -10px rgba(0,0,0,0.45), 0 4px 12px rgba(0,0,0,0.25)",
+    cursor: "pointer",
   }
 
   const shade = (
@@ -545,7 +553,7 @@ export default function LanyardBadge({
         ref={cardRef}
         role="button"
         tabIndex={0}
-        aria-label="Badge. Drag to swing, press to flip."
+        aria-label="Badge. Drag to swing, click to flip."
         onClick={(e) => {
           e.stopPropagation()
           flipRef.current()
@@ -599,7 +607,7 @@ export default function LanyardBadge({
             flipRef.current()
           }}
           aria-pressed={showBack}
-          className="absolute right-2 top-2 z-20 inline-flex items-center gap-1.5 rounded-full border border-border bg-card/90 px-3 py-1 text-xs font-mono font-medium text-foreground shadow-sm backdrop-blur transition-all hover:bg-accent/10 hover:border-accent hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+          className="absolute right-2 top-2 z-20 inline-flex items-center gap-1.5 rounded-full border border-border bg-card/90 px-3 py-1 text-xs font-mono font-medium text-foreground shadow-sm backdrop-blur transition-all hover:bg-accent/10 hover:border-accent hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent cursor-pointer"
         >
           <svg viewBox="0 0 24 24" width={13} height={13} fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="transition-transform duration-500 motion-reduce:transition-none" style={{ transform: showBack ? "scaleX(-1)" : "none" }}>
             <path d="M3 12a9 9 0 0 1 15.5-6.2L21 8" />
