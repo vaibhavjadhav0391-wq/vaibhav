@@ -33,8 +33,8 @@ export function About() {
             {/* Resume & Contact Action Buttons */}
             <div className="flex flex-wrap items-center gap-3 pt-2">
               <a
-                href="/Vaibhav_Jadhav_Resume.docx"
-                download="Vaibhav_Jadhav_Resume.docx"
+                href="/Vaibhav_Jadhav_Resume.pdf"
+                download="Vaibhav_Jadhav_Resume.pdf"
                 className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#e5262c] text-white font-mono text-xs font-bold hover:bg-[#c91e24] transition-all shadow-sm group"
               >
                 <FileDown size={16} className="group-hover:-translate-y-0.5 transition-transform" />

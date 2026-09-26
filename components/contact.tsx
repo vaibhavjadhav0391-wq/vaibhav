@@ -21,8 +21,8 @@ export function Contact() {
         {/* Action Buttons */}
         <div className="flex justify-center gap-4 my-8 flex-wrap">
           <a
-            href="/Vaibhav_Jadhav_Resume.docx"
-            download="Vaibhav_Jadhav_Resume.docx"
+            href="/Vaibhav_Jadhav_Resume.pdf"
+            download="Vaibhav_Jadhav_Resume.pdf"
             className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-accent text-white font-mono text-xs font-bold hover:bg-[#c91e24] transition-all shadow-md group"
           >
             <FileDown size={17} className="group-hover:-translate-y-0.5 transition-transform" />

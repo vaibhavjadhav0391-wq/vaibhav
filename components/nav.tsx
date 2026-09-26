@@ -78,8 +78,8 @@ export function Nav() {
           {/* Action / Resume / Theme Toggle */}
           <div className="flex items-center gap-2.5">
             <a
-              href="/Vaibhav_Jadhav_Resume.docx"
-              download="Vaibhav_Jadhav_Resume.docx"
+              href="/Vaibhav_Jadhav_Resume.pdf"
+              download="Vaibhav_Jadhav_Resume.pdf"
               className={`inline-flex items-center gap-1.5 text-xs font-mono font-bold px-3.5 py-1.5 rounded-full border transition-all shadow-2xs group ${
                 isDark
                   ? "bg-white/10 border-white/20 text-white hover:border-[#e5262c] hover:bg-[#e5262c]/10 hover:text-[#e5262c]"
