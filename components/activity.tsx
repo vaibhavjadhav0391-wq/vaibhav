@@ -82,7 +82,7 @@ export function Activity() {
     fetchLeetCode()
   }, [])
 
-  // Organize GitHub days into weeks (52-53 columns, 7 rows)
+  // Organize GitHub days into weeks (displaying the latest ~26 weeks to fit card width with no scrolling)
   const ghWeeks = useMemo(() => {
     if (ghContributions.length === 0) return []
     const cols: ContributionDay[][] = []
@@ -95,16 +95,18 @@ export function Activity() {
         currentWeek = []
       }
     })
-    return cols
+    // Slice to show the latest 26 weeks so all recent active commits are 100% visible with ZERO scrolling
+    return cols.slice(-26)
   }, [ghContributions])
 
-  // Build LeetCode 52-week heatmap grid from submissionCalendar
+  // Build LeetCode heatmap grid (latest ~26 weeks for zero scrolling)
   const lcWeeks = useMemo(() => {
     const calendar = lcStats.submissionCalendar
     const days: ContributionDay[] = []
     const today = new Date()
 
-    for (let i = 370; i >= 0; i--) {
+    // 26 weeks * 7 = 182 days (approx 6 months up to today)
+    for (let i = 181; i >= 0; i--) {
       const d = new Date(today)
       d.setDate(d.getDate() - i)
       const dateStr = d.toISOString().split("T")[0]
@@ -142,9 +144,9 @@ export function Activity() {
       case 3:
         return "bg-emerald-400 border border-emerald-300"
       case 4:
-        return "bg-emerald-300 shadow-[0_0_8px_rgba(52,211,153,0.8)] border border-white"
+        return "bg-emerald-300 shadow-[0_0_8px_rgba(52,211,153,0.9)] border border-white"
       default:
-        return "bg-white/[0.07] border border-white/[0.04]"
+        return "bg-white/[0.08] border border-white/[0.04]"
     }
   }
 
@@ -158,27 +160,33 @@ export function Activity() {
       case 3:
         return "bg-amber-400 border border-amber-300"
       case 4:
-        return "bg-amber-300 shadow-[0_0_8px_rgba(251,191,36,0.8)] border border-white"
+        return "bg-amber-300 shadow-[0_0_8px_rgba(251,191,36,0.9)] border border-white"
       default:
-        return "bg-white/[0.07] border border-white/[0.04]"
+        return "bg-white/[0.08] border border-white/[0.04]"
     }
   }
 
   return (
-    <section id="activity" className="py-24 relative overflow-hidden">
+    <section id="activity" className="py-24 relative overflow-hidden bg-transparent">
       <div className="container mx-auto px-[max(4vw,1.5rem)] max-w-[1200px]">
-        {/* Section Header with 100% Solid Visible Colors */}
+        {/* Section Header with 100% Solid Black / Theme-Aware Color */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-12 gap-4">
           <div>
             <div className="flex items-center gap-2 text-xs font-mono tracking-widest text-[#e5262c] uppercase font-bold mb-2">
               <Flame size={16} className="animate-pulse text-[#e5262c]" />
               <span>Continuous Output</span>
             </div>
-            <h2 className="font-serif text-3xl sm:text-4xl text-[#141414] dark:text-white font-bold tracking-tight">
+            <h2
+              className="font-serif text-3xl sm:text-4xl font-bold tracking-tight"
+              style={{ color: "var(--foreground)" }}
+            >
               Activity &amp; Contributions
             </h2>
           </div>
-          <p className="text-xs sm:text-sm text-[#141414]/80 dark:text-neutral-300 max-w-md font-mono font-medium leading-relaxed">
+          <p
+            className="text-xs sm:text-sm max-w-md font-mono font-medium leading-relaxed"
+            style={{ color: "var(--muted-foreground)" }}
+          >
             Live-synced daily commits, problem-solving streaks, and algorithmic milestones.
           </p>
         </div>
@@ -186,8 +194,7 @@ export function Activity() {
         {/* Dashboard Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* GitHub Card */}
-          <div className="rounded-3xl border border-neutral-800/80 bg-[#121215] text-white p-7 sm:p-8 flex flex-col justify-between shadow-2xl relative overflow-hidden">
-            {/* Ambient subtle glow */}
+          <div className="rounded-3xl border border-neutral-800/90 bg-[#121215] text-white p-6 sm:p-8 flex flex-col justify-between shadow-2xl relative overflow-hidden">
             <div className="absolute top-0 right-0 w-48 h-48 bg-emerald-500/5 blur-3xl pointer-events-none rounded-full" />
 
             <div>
@@ -227,20 +234,20 @@ export function Activity() {
                 </span>
               </div>
 
-              {/* Heatmap Grid View (Scrollbar Hidden for Clean Look) */}
-              <div className="relative overflow-x-auto pb-4 pt-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+              {/* Heatmap Grid View - Full Width, No Horizontal Scroll Needed */}
+              <div className="w-full pb-3 pt-1">
                 {loadingGh && ghWeeks.length === 0 ? (
                   <div className="h-28 flex items-center justify-center text-xs font-mono text-neutral-400">
                     Syncing live GitHub timeline...
                   </div>
                 ) : (
-                  <div className="flex gap-[4px] min-w-[580px]">
+                  <div className="flex justify-between gap-[3px] sm:gap-[4px] w-full">
                     {ghWeeks.map((week, wIdx) => (
-                      <div key={wIdx} className="flex flex-col gap-[4px]">
+                      <div key={wIdx} className="flex flex-col gap-[3px] sm:gap-[4px] flex-1">
                         {week.map((day) => (
                           <div
                             key={day.date}
-                            className={`w-[10.5px] h-[10.5px] rounded-[3px] cursor-pointer transition-all hover:scale-135 ${getGhCellColor(
+                            className={`aspect-square w-full rounded-[2.5px] cursor-pointer transition-all hover:scale-135 ${getGhCellColor(
                               day.level
                             )}`}
                             onMouseEnter={(e) => {
@@ -260,12 +267,12 @@ export function Activity() {
                 )}
               </div>
 
-              {/* Legend & Cadence Footer */}
+              {/* Legend */}
               <div className="flex items-center justify-between pt-4 mt-2 border-t border-white/10 text-xs font-mono font-medium text-neutral-300">
-                <span className="text-neutral-300 font-semibold">Annual Commit Cadence</span>
+                <span className="text-neutral-300 font-semibold">Recent Active Months</span>
                 <div className="flex items-center gap-1.5">
                   <span className="text-neutral-400 text-[11px]">Less</span>
-                  <div className="w-[10px] h-[10px] rounded-[2px] bg-white/[0.07]" />
+                  <div className="w-[10px] h-[10px] rounded-[2px] bg-white/[0.08]" />
                   <div className="w-[10px] h-[10px] rounded-[2px] bg-emerald-800" />
                   <div className="w-[10px] h-[10px] rounded-[2px] bg-emerald-600" />
                   <div className="w-[10px] h-[10px] rounded-[2px] bg-emerald-400" />
@@ -276,9 +283,8 @@ export function Activity() {
             </div>
           </div>
 
-          {/* LeetCode Card (With Matching Heatmap) */}
-          <div className="rounded-3xl border border-neutral-800/80 bg-[#121215] text-white p-7 sm:p-8 flex flex-col justify-between shadow-2xl relative overflow-hidden">
-            {/* Ambient subtle glow */}
+          {/* LeetCode Card */}
+          <div className="rounded-3xl border border-neutral-800/90 bg-[#121215] text-white p-6 sm:p-8 flex flex-col justify-between shadow-2xl relative overflow-hidden">
             <div className="absolute top-0 right-0 w-48 h-48 bg-amber-500/5 blur-3xl pointer-events-none rounded-full" />
 
             <div>
@@ -324,20 +330,20 @@ export function Activity() {
                 </div>
               </div>
 
-              {/* LeetCode Heatmap Grid View (Scrollbar Hidden) */}
-              <div className="relative overflow-x-auto pb-4 pt-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden mb-4">
+              {/* LeetCode Heatmap Grid View - Full Width, No Horizontal Scroll Needed */}
+              <div className="w-full pb-3 pt-1 mb-4">
                 {loadingLc && lcWeeks.length === 0 ? (
                   <div className="h-28 flex items-center justify-center text-xs font-mono text-neutral-400">
                     Syncing live LeetCode timeline...
                   </div>
                 ) : (
-                  <div className="flex gap-[4px] min-w-[580px]">
+                  <div className="flex justify-between gap-[3px] sm:gap-[4px] w-full">
                     {lcWeeks.map((week, wIdx) => (
-                      <div key={wIdx} className="flex flex-col gap-[4px]">
+                      <div key={wIdx} className="flex flex-col gap-[3px] sm:gap-[4px] flex-1">
                         {week.map((day) => (
                           <div
                             key={day.date}
-                            className={`w-[10.5px] h-[10.5px] rounded-[3px] cursor-pointer transition-all hover:scale-135 ${getLcCellColor(
+                            className={`aspect-square w-full rounded-[2.5px] cursor-pointer transition-all hover:scale-135 ${getLcCellColor(
                               day.level
                             )}`}
                             onMouseEnter={(e) => {
