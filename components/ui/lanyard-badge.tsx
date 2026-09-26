@@ -2,54 +2,28 @@
 
 import * as React from "react"
 
-/**
- * Lanyard Badge - an event badge hanging from a patterned lanyard.
- *
- * Two strands come down from above the frame and meet at a side-release
- * buckle; a short strap and a ring hold the card. The strap is a verlet rope
- * drawn as a textured ribbon on a 2D canvas. The card is real HTML turned in 3D with
- * CSS, so both faces can hold anything.
- */
-
 export interface LanyardBadgeProps {
-  /** Card front. Replaces the built-in front entirely. */
   front?: React.ReactNode
-  /** Card back. Replaces the built-in back entirely. */
   back?: React.ReactNode
-  /** Built-in front: the event title. */
   title?: string
-  /** Built-in front: the line under the title. */
   subtitle?: string
-  /** Built-in back: the wearer's name. */
   name?: string
-  /** Built-in back: the wearer's role. */
   role?: string
-  /** Script line printed along the strap. */
   strapText?: string
-  /** Condensed label printed along the strap, between the script lines. */
   strapLabel?: string
-  /** Strap colour, #rrggbb. */
   strapColor?: string
-  /** Ornament and print colour, on the strap and the built-in card. */
   inkColor?: string
-  /** Built-in card stock colour. */
   cardColor?: string
-  /** Show the "Show back / Show front" button in the top corner. */
   flipButton?: boolean
-  /** Card width in px. Height follows at 3:2, strap width at a tenth. */
   cardWidth?: number
-  /** Root height. A definite length - never a percentage. */
   height?: string
-  /** Extra root class names. */
   className?: string
 }
 
-// #region physics
 export type Pt = { x: number; y: number; px: number; py: number; w: number }
 export type Link = [number, number, number]
 export type Spin = { a: number; v: number }
 
-/** Verlet step. `w` is inverse mass; 0 pins a point in place. */
 export function integrate(pts: Pt[], dt: number, gravity: number, damping: number) {
   for (const p of pts) {
     if (!p.w) continue
@@ -62,7 +36,6 @@ export function integrate(pts: Pt[], dt: number, gravity: number, damping: numbe
   }
 }
 
-/** Relax distance constraints, heavier points moving less. */
 export function solve(pts: Pt[], links: Link[], iterations: number) {
   for (let k = 0; k < iterations; k++) {
     for (const [i, j, rest] of links) {
@@ -82,24 +55,18 @@ export function solve(pts: Pt[], links: Link[], iterations: number) {
   }
 }
 
-/**
- * The card's turn on the ring.
- */
 export function spinStep(s: Spin, target: number, dt: number, drive: number) {
   s.v += (-(s.a - target) * 22 - s.v * 3.8 + drive) * dt
   s.a += s.v * dt
 }
 
-/** How far the card swings from hanging straight down, in radians. Right is positive. */
 export function swingAngle(top: Pt, bottom: Pt) {
   return Math.atan2(bottom.x - top.x, bottom.y - top.y)
 }
-// #endregion
 
 const DISPLAY = '"Oswald", "Bebas Neue", "Arial Narrow", Impact, sans-serif'
 const SCRIPT = '"Segoe Script", "Brush Script MT", "Snell Roundhand", cursive'
 
-/** A mandala: rings, petals, a bead circle and a flower in the middle. */
 function drawMandala(ctx: CanvasRenderingContext2D, cx: number, cy: number, r: number) {
   ctx.save()
   ctx.translate(cx, cy)
@@ -128,38 +95,6 @@ function drawMandala(ctx: CanvasRenderingContext2D, cx: number, cy: number, r: n
   ctx.restore()
 }
 
-/** Vector ornament for the card face. */
-function Ornament({ className, style }: { className?: string; style?: React.CSSProperties }) {
-  return (
-    <svg viewBox="0 0 200 200" fill="none" stroke="currentColor" strokeWidth={1.5} className={className} style={style}>
-      <circle cx={100} cy={100} r={95} strokeWidth={1} strokeDasharray="3 3" />
-      <circle cx={100} cy={100} r={80} strokeWidth={2} />
-      <circle cx={100} cy={100} r={55} strokeWidth={1} />
-      <circle cx={100} cy={100} r={30} strokeWidth={1.5} />
-      {Array.from({ length: 12 }).map((_, i) => (
-        <line
-          key={i}
-          x1={100 + Math.cos((i * Math.PI) / 6) * 55}
-          y1={100 + Math.sin((i * Math.PI) / 6) * 55}
-          x2={100 + Math.cos((i * Math.PI) / 6) * 80}
-          y2={100 + Math.sin((i * Math.PI) / 6) * 80}
-          strokeWidth={1}
-        />
-      ))}
-      <circle cx={100} cy={100} r={8} fill="currentColor" />
-    </svg>
-  )
-}
-
-/** Directional arrow graphic for badge edges. */
-function Arrow({ className, style }: { className?: string; style?: React.CSSProperties }) {
-  return (
-    <svg viewBox="0 0 20 200" fill="none" stroke="currentColor" strokeWidth={1.5} className={className} style={style}>
-      <path d="M10 0v190M3 180l7 15 7-15" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  )
-}
-
 export default function LanyardBadge({
   front,
   back,
@@ -173,8 +108,8 @@ export default function LanyardBadge({
   inkColor = "#e5262c",
   cardColor = "#ffffff",
   flipButton = true,
-  cardWidth = 230,
-  height = "580px",
+  cardWidth = 210,
+  height = "560px",
   className = "",
 }: LanyardBadgeProps) {
   const rootRef = React.useRef<HTMLElement>(null)
@@ -196,10 +131,10 @@ export default function LanyardBadge({
     return () => q.removeEventListener("change", onQ)
   }, [])
 
-  const cw = Math.max(160, Math.min(360, cardWidth))
-  const ch = Math.round(cardWidth * 1.5)
-  const ringR = Math.max(7, Math.round(cw * 0.036))
-  const clipH = Math.round(cw * 0.1)
+  const cw = Math.max(160, Math.min(320, cardWidth))
+  const ch = Math.round(cw * 1.48)
+  const ringR = Math.max(6, Math.round(cw * 0.034))
+  const clipH = Math.round(cw * 0.09)
 
   const look = React.useRef({ strapText, strapLabel, strapColor, inkColor })
   look.current = { strapText, strapLabel, strapColor, inkColor }
@@ -218,6 +153,7 @@ export default function LanyardBadge({
     let H = 1
     let strapTex: HTMLCanvasElement | null = null
     let plainTex: HTMLCanvasElement | null = null
+
     const spin: Spin = { a: 0, v: 0 }
     let spinTarget = backRef.current ? Math.PI : 0
     spin.a = spinTarget
@@ -236,6 +172,7 @@ export default function LanyardBadge({
       pts.push({ x, y, px: x, py: y, w })
       return pts.length - 1
     }
+
     const strand = (from: number, to: number, n: number, slack: number) => {
       const a = pts[from]
       const b = pts[to]
@@ -268,37 +205,37 @@ export default function LanyardBadge({
       right.length = 0
       low.length = 0
 
-      const anchorSpan = Math.max(cw * 0.9, W * 0.38)
-      const aL = add(W / 2 - anchorSpan / 2, -10, 0)
-      const aR = add(W / 2 + anchorSpan / 2, -10, 0)
-      
-      // bY & rY tuned so the card sits perfectly centered with full visibility of top and bottom
-      const bY = Math.min(H * 0.15, Math.max(45, ch * 0.20))
-      const bL = add(W / 2 - cw * 0.045, bY, 0.4)
-      const bR = add(W / 2 + cw * 0.045, bY, 0.4)
+      const anchorSpan = Math.max(cw * 0.75, W * 0.35)
+      const aL = add(W / 2 - anchorSpan / 2, -2, 0)
+      const aR = add(W / 2 + anchorSpan / 2, -2, 0)
+
+      // Keep buckle and ring higher up so full card is 100% visible inside container
+      const bY = 50
+      const bL = add(W / 2 - cw * 0.04, bY, 0.4)
+      const bR = add(W / 2 + cw * 0.04, bY, 0.4)
       const buckleRest = Math.hypot(pts[bR].x - pts[bL].x, pts[bR].y - pts[bL].y)
       links.push([bL, bR, buckleRest])
 
-      const sL = strand(aL, bL, 9, 1.04)
-      const sR = strand(aR, bR, 9, 1.04)
+      const sL = strand(aL, bL, 7, 1.02)
+      const sR = strand(aR, bR, 7, 1.02)
       left.push(...sL.list)
       right.push(...sR.list)
       strandRest = sL.rest
 
-      const rY = bY + Math.max(18, ch * 0.11)
+      const rY = bY + 16
       iT = add(W / 2, rY, 0.8)
       links.push([bL, iT, Math.hypot(pts[iT].x - pts[bL].x, pts[iT].y - pts[bL].y)])
       links.push([bR, iT, Math.hypot(pts[iT].x - pts[bR].x, pts[iT].y - pts[bR].y)])
 
-      iC = add(W / 2, rY + ch * 0.6, 1)
-      links.push([iT, iC, ch * 0.6])
+      iC = add(W / 2, rY + ch * 0.5, 1)
+      links.push([iT, iC, ch * 0.5])
 
-      const sLow = strand(bL, iT, 4, 1.0)
+      const sLow = strand(bL, iT, 3, 1.0)
       low.push(...sLow.list)
-      lowLen = sLow.rest * 4
+      lowLen = sLow.rest * 3
 
-      const Wt = Math.max(16, Math.round(cw * 0.09)) * dpr
-      const Ht = 360 * dpr
+      const Wt = Math.max(15, Math.round(cw * 0.085)) * dpr
+      const Ht = 340 * dpr
       const makePatternCanvas = (withText: boolean) => {
         const c = document.createElement("canvas")
         c.width = Wt
@@ -330,142 +267,150 @@ export default function LanyardBadge({
       plainTex = makePatternCanvas(false)
     }
 
-    const ribbon = (chain: number[], tex: HTMLCanvasElement, rest: number, light: number) => {
+    const drawRibbon = (idxList: number[], widthPx: number, tex: HTMLCanvasElement | null, flip: boolean) => {
+      if (!tex || idxList.length < 2) return
       const dpr = Math.min(2, window.devicePixelRatio || 1)
-      const Wt = tex.width
-      const k = Wt / (Math.max(16, Math.round(cw * 0.09)) * dpr)
-      let v = 0
-      for (let i = 0; i < chain.length - 1; i++) {
-        const a = pts[chain[i]]
-        const b = pts[chain[i + 1]]
-        const dx = b.x - a.x
-        const dy = b.y - a.y
-        const segLen = Math.hypot(dx, dy)
-        if (segLen < 1e-3) continue
-        const nx = -dy / segLen
-        const ny = dx / segLen
-        const tx = dx / segLen
-        const ty = dy / segLen
-        const v0 = (v * dpr) % tex.height
-        const dv = rest * dpr
-        v += rest
+      const half = (widthPx * dpr) / 2
+      let total = 0
+      for (let i = 0; i < idxList.length - 1; i++) {
+        const a = pts[idxList[i]]
+        const b = pts[idxList[i + 1]]
+        total += Math.hypot(b.x - a.x, b.y - a.y) * dpr
+      }
+      let acc = 0
+      for (let i = 0; i < idxList.length - 1; i++) {
+        const a = pts[idxList[i]]
+        const b = pts[idxList[i + 1]]
+        const ax = a.x * dpr
+        const ay = a.y * dpr
+        const bx = b.x * dpr
+        const by = b.y * dpr
+        const seg = Math.hypot(bx - ax, by - ay)
+        const nx = -(by - ay) / (seg || 1)
+        const ny = (bx - ax) / (seg || 1)
+        const sx0 = 0
+        const sx1 = tex.width
+        const v0 = ((acc / total) * tex.height) % tex.height
+        const v1 = (((acc + seg) / total) * tex.height) % tex.height
         ctx.save()
-        ctx.setTransform(nx, ny, tx * k, ty * k, a.x * dpr - (nx * Wt) / 2 - tx * k * v0, a.y * dpr - (ny * Wt) / 2 - ty * k * v0)
-        const src = Math.min(dv + 1.5, tex.height - v0)
-        if (src > 0) ctx.drawImage(tex, 0, v0, Wt, src, 0, v0, Wt, src)
-        const shade = 0.22 * (1 - Math.max(0, nx * light))
-        ctx.fillStyle = "rgba(0,0,0," + shade.toFixed(3) + ")"
-        ctx.fillRect(0, v0, Wt, src)
+        ctx.beginPath()
+        ctx.moveTo(ax - nx * half, ay - ny * half)
+        ctx.lineTo(ax + nx * half, ay + ny * half)
+        ctx.lineTo(bx + nx * half, by + ny * half)
+        ctx.lineTo(bx - nx * half, by - ny * half)
+        ctx.closePath()
+        ctx.clip()
+
+        const ang = Math.atan2(by - ay, bx - ax) - Math.PI / 2
+        ctx.translate(ax, ay)
+        ctx.rotate(ang)
+        if (flip) ctx.scale(-1, 1)
+        const dw = widthPx * dpr
+        const dh = Math.max(1, seg)
+        ctx.drawImage(tex, sx0, Math.min(v0, v1), sx1 - sx0, Math.max(2, Math.abs(v1 - v0)), -half, 0, dw, dh)
         ctx.restore()
+        acc += seg
       }
     }
 
-    const draw = () => {
+    const drawHardware = () => {
       const dpr = Math.min(2, window.devicePixelRatio || 1)
-      ctx.setTransform(1, 0, 0, 1, 0, 0)
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
-      if (!strapTex || !plainTex) return
-      ctx.imageSmoothingEnabled = true
-      ribbon(left, strapTex, strandRest, -1)
-      ribbon(right, strapTex, strandRest, 1)
-      ribbon(low, plainTex, (lowLen * 1) / 3, 0)
-
-      // Ring
+      const bL = pts[left[left.length - 1]]
+      const bR = pts[right[right.length - 1]]
       const T = pts[iT]
+      const bx = ((bL.x + bR.x) / 2) * dpr
+      const by = ((bL.y + bR.y) / 2) * dpr
+      const bw = Math.max(18, cw * 0.11) * dpr
+      const bh = Math.max(12, cw * 0.065) * dpr
+
+      // Buckle
       ctx.save()
-      ctx.setTransform(dpr, 0, 0, dpr, T.x * dpr, T.y * dpr)
-      ctx.lineWidth = Math.max(2, ringR * 0.25)
-      ctx.strokeStyle = "#e5ded2"
+      ctx.translate(bx, by)
+      ctx.fillStyle = "#18181b"
+      ctx.strokeStyle = "#3f3f46"
+      ctx.lineWidth = 1 * dpr
       ctx.beginPath()
-      ctx.arc(0, 0, ringR, 0, Math.PI * 2)
+      ctx.roundRect(-bw / 2, -bh / 2, bw, bh, 3 * dpr)
+      ctx.fill()
+      ctx.stroke()
+      ctx.fillStyle = look.current.inkColor
+      ctx.fillRect(-bw * 0.35, -bh * 0.2, bw * 0.7, bh * 0.4)
+      ctx.restore()
+
+      // Metal Ring
+      const rx = T.x * dpr
+      const ry = T.y * dpr
+      const rad = ringR * dpr
+      ctx.save()
+      ctx.translate(rx, ry)
+      ctx.lineWidth = Math.max(2, rad * 0.26)
+      ctx.strokeStyle = "#d4d4d8"
+      ctx.beginPath()
+      ctx.arc(0, 0, rad, 0, Math.PI * 2)
+      ctx.stroke()
+      ctx.lineWidth = Math.max(1, rad * 0.1)
+      ctx.strokeStyle = "#71717a"
       ctx.stroke()
       ctx.restore()
+    }
+
+    const draw = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+      const sw = Math.max(14, cw * 0.085)
+      drawRibbon(left, sw, strapTex, false)
+      drawRibbon(right, sw, strapTex, true)
+      drawRibbon(low, sw * 0.85, plainTex, false)
+      drawHardware()
     }
 
     const place = () => {
       const T = pts[iT]
       const C = pts[iC]
-      const swing = swingAngle(T, C)
-      card.style.transform =
-        "translate3d(" + (T.x - cw / 2).toFixed(2) + "px," + (T.y + ringR).toFixed(2) + "px,0) rotate(" + (-swing).toFixed(4) + "rad)"
-      inner.style.transform = "perspective(1100px) rotateY(" + spin.a.toFixed(4) + "rad)"
-      const edge = 1 - Math.abs(Math.cos(spin.a))
-      inner.style.setProperty("--lyd-dim", (edge * 0.5).toFixed(3))
-      inner.style.setProperty("--lyd-shine", (50 + Math.sin(spin.a) * 70 + swing * 90).toFixed(1) + "%")
+      if (!T || !C) return
+      const ang = swingAngle(T, C)
+      card.style.transform = `translate3d(${T.x - cw / 2}px, ${T.y}px, 0) rotate(${ang}rad)`
+      const turn = spin.a
+      const faceTurn = ((turn % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2)
+      const isBack = faceTurn > Math.PI / 2 && faceTurn < Math.PI * 1.5
+      const shine = `${Math.round(50 + Math.sin(turn) * 40)}%`
+      const dim = Math.max(0, Math.cos(turn) * 0.15)
+      inner.style.setProperty("--lyd-shine", shine)
+      inner.style.setProperty("--lyd-dim", String(dim))
+      inner.style.transform = `rotateY(${turn}rad)`
+      if (isBack !== showBack) {
+        setShowBack(isBack)
+      }
     }
 
-    // ---- interaction -----------------------------------------------------
-    type Drag = {
-      id: number
-      ox: number
-      oy: number
-      tx: number
-      ty: number
-      sx: number
-      sy: number
-      startTime: number
-      moved: boolean
-    }
-    let drag: Drag | null = null
-    let lastFlipTime = 0
-
-    const local = (e: PointerEvent) => {
-      const r = root.getBoundingClientRect()
-      return [e.clientX - r.left, e.clientY - r.top]
-    }
-
-    const flip = () => {
-      const now = performance.now()
-      if (now - lastFlipTime < 180) return
-      lastFlipTime = now
-      spinTarget = spinTarget === 0 ? Math.PI : 0
-      setShowBack(spinTarget !== 0)
-    }
-    flipRef.current = flip
-
+    let drag: { id: number; ox: number; oy: number; tx: number; ty: number } | null = null
     const onDown = (e: PointerEvent) => {
-      if (e.button > 0) return
-      const [x, y] = local(e)
-      const T = pts[iT]
-      drag = {
-        id: e.pointerId,
-        ox: T.x - x,
-        oy: T.y - y,
-        tx: T.x,
-        ty: T.y,
-        sx: x,
-        sy: y,
-        startTime: performance.now(),
-        moved: false,
-      }
-      pts[iT].w = 0
-      try {
-        card.setPointerCapture(e.pointerId)
-      } catch {
-        // ignore
-      }
+      e.preventDefault()
+      const rect = root.getBoundingClientRect()
+      const x = e.clientX - rect.left
+      const y = e.clientY - rect.top
+      drag = { id: e.pointerId, ox: x, oy: y, tx: x, ty: y }
+      card.setPointerCapture(e.pointerId)
       card.style.cursor = "grabbing"
     }
 
     const onMove = (e: PointerEvent) => {
-      if (!drag || e.pointerId !== drag.id) return
-      const [x, y] = local(e)
-      drag.tx = x + drag.ox
-      drag.ty = y + drag.oy
-      if (Math.hypot(x - drag.sx, y - drag.sy) > 12) {
-        drag.moved = true
-      }
+      if (!drag || drag.id !== e.pointerId) return
+      const rect = root.getBoundingClientRect()
+      drag.tx = e.clientX - rect.left
+      drag.ty = e.clientY - rect.top
     }
 
     const onUp = (e: PointerEvent) => {
-      if (!drag || e.pointerId !== drag.id) return
-      const elapsed = performance.now() - drag.startTime
-      if (!drag.moved || elapsed < 250) {
-        flip()
-      }
+      if (!drag || drag.id !== e.pointerId) return
+      const moved = Math.hypot(drag.tx - drag.ox, drag.ty - drag.oy)
       drag = null
-      pts[iT].w = 0.8
+      try {
+        card.releasePointerCapture(e.pointerId)
+      } catch {}
       card.style.cursor = "grab"
+      if (moved < 6) {
+        flipTarget()
+      }
     }
 
     card.addEventListener("pointerdown", onDown)
@@ -473,19 +418,25 @@ export default function LanyardBadge({
     card.addEventListener("pointerup", onUp)
     card.addEventListener("pointercancel", onUp)
 
-    // ---- loop --------------------------------------------------------------
+    const flipTarget = () => {
+      const next = !backRef.current
+      backRef.current = next
+      spinTarget = next ? Math.PI : 0
+    }
+    flipRef.current = flipTarget
+
     let raf = 0
-    let last = performance.now()
+    let lastT = performance.now()
     let acc = 0
-    let t = 0
     const STEP = 1 / 120
-    const GRAVITY = 980
-    const ITER = 8
+    const GRAVITY = 1800
+    const ITER = 14
+    let t = 0
 
     const tick = (now: number) => {
-      dt = Math.min(0.05, (now - last) / 1000)
-      acc += dt
-      last = now
+      const delta = Math.min(0.05, (now - lastT) / 1000)
+      lastT = now
+      acc += delta
       let steps = 0
       while (acc >= STEP && steps < 8) {
         acc -= STEP
@@ -500,18 +451,18 @@ export default function LanyardBadge({
         }
         const C = pts[iC]
         if (!reduced && !drag) {
-          C.x += (20 * Math.sin(t * 0.7) + 10 * Math.sin(t * 1.9)) * STEP * STEP
+          C.x += (16 * Math.sin(t * 0.6) + 8 * Math.sin(t * 1.7)) * STEP * STEP
         }
         integrate(pts, STEP, GRAVITY, 0.992)
         solve(pts, links, ITER)
         const vx = (C.x - C.px) / STEP
-        spinStep(spin, spinTarget, STEP, vx * 0.03 + (reduced ? 0 : 0.6 * Math.sin(t * 0.5)))
+        spinStep(spin, spinTarget, STEP, vx * 0.03 + (reduced ? 0 : 0.5 * Math.sin(t * 0.5)))
       }
       draw()
       place()
       raf = requestAnimationFrame(tick)
     }
-    let dt = 0
+
     build()
     draw()
     place()
@@ -563,10 +514,10 @@ export default function LanyardBadge({
       aria-hidden="true"
       style={{
         position: "absolute",
-        top: cw * 0.05,
+        top: cw * 0.045,
         left: "50%",
-        width: cw * 0.2,
-        height: cw * 0.035,
+        width: cw * 0.18,
+        height: cw * 0.032,
         transform: "translateX(-50%)",
         borderRadius: 999,
         background: "rgba(0,0,0,0.35)",
@@ -574,40 +525,6 @@ export default function LanyardBadge({
         zIndex: 10,
       }}
     />
-  )
-
-  const s = cw / 240
-
-  const defaultFront = (
-    <div className="relative h-full w-full" style={{ background: cardColor, color: inkColor }}>
-      <Ornament className="absolute" style={{ width: 300 * s, right: -130 * s, top: 100 * s, maxWidth: "none" }} />
-      <Ornament className="absolute" style={{ width: 210 * s, left: -40 * s, bottom: -70 * s, maxWidth: "none", opacity: 0.8 }} />
-      <Arrow className="absolute" style={{ width: 14 * s, height: 250 * s, left: 26 * s, top: 110 * s, transform: "rotate(-14deg)", maxWidth: "none" }} />
-      <div className="absolute" style={{ left: 22 * s, top: 34 * s, right: 22 * s }}>
-        <div style={{ fontFamily: DISPLAY, fontWeight: 700, fontSize: 25 * s, lineHeight: 1, textTransform: "uppercase", letterSpacing: "0.01em" }}>
-          {title}
-        </div>
-        <div style={{ fontSize: 6.5 * s, marginTop: 6 * s, letterSpacing: "0.18em", textTransform: "uppercase", opacity: 0.85 }}>
-          {subtitle}
-        </div>
-      </div>
-    </div>
-  )
-
-  const defaultBack = (
-    <div className="relative h-full w-full" style={{ background: cardColor }}>
-      <Ornament className="absolute" style={{ width: 150 * s, right: -30 * s, top: 30 * s, color: inkColor, opacity: 0.6, maxWidth: "none" }} />
-      <div className="absolute" style={{ left: 22 * s, top: 70 * s, color: strapColor }}>
-        <Ornament style={{ width: 26 * s, color: inkColor }} />
-        <div style={{ width: 16 * s, height: 2 * s, background: strapColor, margin: (14 * s) + "px 0 " + (8 * s) + "px" }} />
-        <div style={{ fontFamily: DISPLAY, fontWeight: 700, fontSize: 17 * s, lineHeight: 1.05, textTransform: "uppercase" }}>{name}</div>
-        <div style={{ fontSize: 7 * s, marginTop: 3 * s, letterSpacing: "0.14em", textTransform: "uppercase", opacity: 0.7 }}>{role}</div>
-      </div>
-      <div className="absolute overflow-hidden" style={{ left: 0, right: 0, bottom: 0, height: "44%", background: strapColor, borderTopLeftRadius: 40 * s, color: cardColor }}>
-        <Ornament className="absolute" style={{ width: 230 * s, left: -20 * s, top: -40 * s, opacity: 0.85, maxWidth: "none" }} />
-        <Arrow className="absolute" style={{ width: 12 * s, height: 220 * s, left: 150 * s, top: -40 * s, transform: "rotate(62deg)", maxWidth: "none" }} />
-      </div>
-    </div>
   )
 
   return (
@@ -619,7 +536,7 @@ export default function LanyardBadge({
       <canvas
         ref={canvasRef}
         aria-hidden="true"
-        style={{ position: "absolute", inset: 0, width: "100%", height: "100%", maxWidth: "none", display: "block", pointerEvents: "none" }}
+        style={{ position: "absolute", inset: 0, width: "100%", height: "100%", display: "block", pointerEvents: "none" }}
       />
       <div
         ref={cardRef}
@@ -640,7 +557,6 @@ export default function LanyardBadge({
         className="absolute left-0 top-0 outline-none focus-visible:ring-2 focus-visible:ring-accent transition-shadow"
         style={{ width: cw, height: ch + ringR + clipH, transformOrigin: "50% 0", cursor: "grab", touchAction: "none", willChange: "transform" }}
       >
-        {/* badge clip: hooks the ring, bites the card */}
         <div
           aria-hidden="true"
           style={{
@@ -648,7 +564,7 @@ export default function LanyardBadge({
             left: "50%",
             top: 0,
             width: cw * 0.08,
-            height: clipH + cw * 0.05,
+            height: clipH + cw * 0.04,
             transform: "translateX(-50%)",
             borderRadius: cw * 0.02,
             background: "linear-gradient(90deg, #eae4d8, #a8a090 50%, #ece6da)",
@@ -658,15 +574,15 @@ export default function LanyardBadge({
         />
         <div
           ref={innerRef}
-          style={{ position: "absolute", left: 0, right: 0, top: ringR + clipH * 0.6, height: ch, transformStyle: "preserve-3d" }}
+          style={{ position: "absolute", left: 0, right: 0, top: ringR + clipH * 0.55, height: ch, transformStyle: "preserve-3d" }}
         >
           <div style={face}>
-            {front ?? defaultFront}
+            {front}
             {slot}
             {shade}
           </div>
           <div style={{ ...face, transform: "rotateY(180deg)" }}>
-            {back ?? defaultBack}
+            {back}
             {slot}
             {shade}
           </div>

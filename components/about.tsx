@@ -51,7 +51,7 @@ export function About() {
           {/* Right Column: Hanging 3D Lanyard Student ID Pass */}
           <div className="lg:col-span-5 flex flex-col items-center justify-center relative w-full">
             <div className="text-center mb-2">
-              <span className="text-[0.76rem] font-mono font-bold text-[#e5262c] tracking-wider uppercase flex items-center justify-center gap-1">
+              <span className="text-[0.76rem] font-mono font-bold text-[#e5262c] tracking-wider uppercase flex items-center justify-center gap-1.5">
                 <span>⚡</span> 3D Interactive Student Pass
               </span>
               <p className="text-[0.74rem] text-muted-foreground font-mono">
@@ -59,8 +59,8 @@ export function About() {
               </p>
             </div>
 
-            <div className="w-full max-w-[360px] h-[580px] flex items-center justify-center">
-              <StudentBadge height="580px" cardWidth={230} />
+            <div className="w-full max-w-[340px] h-[560px] flex items-center justify-center">
+              <StudentBadge height="560px" cardWidth={210} />
             </div>
           </div>
         </div>
@@ -68,3 +68,4 @@ export function About() {
     </section>
   )
 }
+
