@@ -1,7 +1,7 @@
 "use client"
 
 import { useTheme } from "next-themes"
-import { Sun, Moon } from "lucide-react"
+import { Sun, Moon, FileDown } from "lucide-react"
 import { useEffect, useState } from "react"
 
 const links = [
@@ -67,8 +67,17 @@ export function Nav() {
             ))}
           </nav>
 
-          {/* Action / Theme Toggle */}
+          {/* Action / Resume / Theme Toggle */}
           <div className="flex items-center gap-2.5">
+            <a
+              href="/Vaibhav_Jadhav_Resume.docx"
+              download="Vaibhav_Jadhav_Resume.docx"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold px-3.5 py-1.5 rounded-full border border-[#141414]/15 dark:border-white/15 bg-white/70 dark:bg-[#1c1c20] text-[#141414] dark:text-[#f6f4f0] hover:border-[#e5262c] hover:text-[#e5262c] transition-all shadow-2xs group"
+            >
+              <FileDown size={14} className="text-[#e5262c] group-hover:-translate-y-0.5 transition-transform" />
+              <span>Resume</span>
+            </a>
+
             <a
               href="mailto:vaibhavjadhav0301@gmail.com"
               className="hidden sm:inline-flex text-xs font-semibold px-3 py-1.5 rounded-full bg-[#e5262c] text-white hover:bg-[#c91e24] transition-colors shadow-xs"
@@ -80,7 +89,7 @@ export function Nav() {
               type="button"
               onClick={toggleTheme}
               aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
-              className="p-2 rounded-full border border-[#141414]/10 dark:border-white/10 bg-white/50 dark:bg-white/5 text-[#141414] dark:text-[#f6f4f0] hover:border-[#e5262c] hover:text-[#e5262c] transition-all"
+              className="p-2 rounded-full border border-[#141414]/10 dark:border-white/10 bg-white/50 dark:bg-white/5 text-[#141414] dark:text-[#f6f4f0] hover:border-[#e5262c] hover:text-[#e5262c] transition-all cursor-pointer"
             >
               {mounted ? (
                 isDark ? (

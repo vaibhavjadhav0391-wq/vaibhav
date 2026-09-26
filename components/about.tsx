@@ -1,6 +1,7 @@
 "use client"
 
 import { StudentBadge } from "@/components/student-badge"
+import { FileDown, Mail } from "lucide-react"
 
 export function About() {
   return (
@@ -28,6 +29,25 @@ export function About() {
             <p className="text-[0.98rem] text-muted-foreground leading-[1.8]">
               I focus on crafting purposeful Android applications, exploring modern AI automation, and shipping production-ready software. Having completed an engineering internship at <strong className="text-foreground font-medium">Connect Soft Infotech</strong> and software simulations at <strong className="text-foreground font-medium">Deloitte</strong>, I have designed and delivered 6+ end-to-end projects.
             </p>
+
+            {/* Resume & Contact Action Buttons */}
+            <div className="flex flex-wrap items-center gap-3 pt-2">
+              <a
+                href="/Vaibhav_Jadhav_Resume.docx"
+                download="Vaibhav_Jadhav_Resume.docx"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#e5262c] text-white font-mono text-xs font-bold hover:bg-[#c91e24] transition-all shadow-sm group"
+              >
+                <FileDown size={16} className="group-hover:-translate-y-0.5 transition-transform" />
+                <span>Download Resume</span>
+              </a>
+              <a
+                href="mailto:vaibhavjadhav0301@gmail.com"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-border bg-card text-foreground font-mono text-xs font-semibold hover:border-accent hover:text-accent transition-all shadow-2xs"
+              >
+                <Mail size={15} />
+                <span>Say Hello</span>
+              </a>
+            </div>
 
             {/* Stats Row */}
             <div className="grid grid-cols-3 gap-4 pt-6 border-t border-border">
@@ -69,3 +89,4 @@ export function About() {
   )
 }
 
+export default About
