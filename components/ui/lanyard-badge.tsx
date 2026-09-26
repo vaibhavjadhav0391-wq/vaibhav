@@ -64,13 +64,10 @@ export function swingAngle(top: Pt, bottom: Pt) {
   return Math.atan2(bottom.x - top.x, bottom.y - top.y)
 }
 
-const DISPLAY = '"Oswald", "Bebas Neue", "Arial Narrow", Impact, sans-serif'
-const SCRIPT = '"Segoe Script", "Brush Script MT", "Snell Roundhand", cursive'
-
 function drawMandala(ctx: CanvasRenderingContext2D, cx: number, cy: number, r: number) {
   ctx.save()
   ctx.translate(cx, cy)
-  ctx.lineWidth = Math.max(0.8, r * 0.018)
+  ctx.lineWidth = Math.max(0.8, r * 0.02)
   for (const k of [1, 0.9, 0.62, 0.26]) {
     ctx.beginPath()
     ctx.arc(0, 0, r * k, 0, Math.PI * 2)
@@ -80,7 +77,7 @@ function drawMandala(ctx: CanvasRenderingContext2D, cx: number, cy: number, r: n
     ctx.save()
     ctx.rotate((i * Math.PI) / 8)
     ctx.beginPath()
-    ctx.arc(r * 0.76, 0, r * 0.035, 0, Math.PI * 2)
+    ctx.arc(r * 0.76, 0, r * 0.04, 0, Math.PI * 2)
     ctx.fill()
     ctx.restore()
   }
@@ -102,7 +99,7 @@ export default function LanyardBadge({
   subtitle = "CS ENGINEER · 2026",
   name = "Vaibhav Jadhav",
   role = "Mobile & AI Developer",
-  strapText = "vaibhav jadhav · portfolio",
+  strapText = "VAIBHAV",
   strapLabel = "MIT CSN 2026",
   strapColor = "#141414",
   inkColor = "#e5262c",
@@ -234,7 +231,7 @@ export default function LanyardBadge({
       low.push(...sLow.list)
       lowLen = sLow.rest * 3
 
-      const Wt = Math.max(15, Math.round(cw * 0.085)) * dpr
+      const Wt = Math.max(16, Math.round(cw * 0.09)) * dpr
       const Ht = 340 * dpr
       const makePatternCanvas = (withText: boolean) => {
         const c = document.createElement("canvas")
@@ -242,22 +239,28 @@ export default function LanyardBadge({
         c.height = Ht
         const x = c.getContext("2d")
         if (!x) return null
-        x.fillStyle = look.current.strapColor
+        x.fillStyle = look.current.strapColor || "#141414"
         x.fillRect(0, 0, Wt, Ht)
-        x.fillStyle = look.current.inkColor
-        x.strokeStyle = look.current.inkColor
-        x.lineWidth = Math.max(1, dpr)
-        x.strokeRect(Wt * 0.08, 0, Wt * 0.84, Ht)
-        drawMandala(x, Wt / 2, Ht * 0.2, Wt * 0.38)
-        drawMandala(x, Wt / 2, Ht * 0.7, Wt * 0.38)
+
+        // Bold red side rails
+        x.fillStyle = look.current.inkColor || "#e5262c"
+        x.fillRect(0, 0, Math.max(2, Wt * 0.12), Ht)
+        x.fillRect(Wt - Math.max(2, Wt * 0.12), 0, Math.max(2, Wt * 0.12), Ht)
+
+        // Decorative mandalas/emblems
+        x.strokeStyle = look.current.inkColor || "#e5262c"
+        drawMandala(x, Wt / 2, Ht * 0.15, Wt * 0.34)
+        drawMandala(x, Wt / 2, Ht * 0.85, Wt * 0.34)
+
         if (withText) {
           x.save()
-          x.translate(Wt / 2, Ht * 0.45)
+          x.translate(Wt / 2, Ht * 0.5)
           x.rotate(-Math.PI / 2)
-          x.font = `700 ${Math.round(Wt * 0.36)}px ${SCRIPT}`
+          x.fillStyle = "#ffffff"
+          x.font = `900 ${Math.round(Wt * 0.38)}px system-ui, sans-serif`
           x.textAlign = "center"
           x.textBaseline = "middle"
-          x.fillText(look.current.strapText, 0, 0)
+          x.fillText(look.current.strapText || "VAIBHAV", 0, 0)
           x.restore()
         }
         return c
@@ -356,7 +359,7 @@ export default function LanyardBadge({
 
     const draw = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height)
-      const sw = Math.max(14, cw * 0.085)
+      const sw = Math.max(15, cw * 0.09)
       drawRibbon(left, sw, strapTex, false)
       drawRibbon(right, sw, strapTex, true)
       drawRibbon(low, sw * 0.85, plainTex, false)
