@@ -22,7 +22,7 @@ const entries = [
   },
   {
     date: "2023 — 2026 (3rd Year)",
-    title: "B.Tech in Computer Science & AI",
+    title: "B.Tech in AI(DS)",
     org: "Maharashtra Institute of Technology, CSN · CGPA 9.45",
     badge: "Department Top Ranker",
     bullets: [
