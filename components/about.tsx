@@ -19,7 +19,7 @@ export function About() {
           <div className="lg:col-span-7 flex flex-col gap-6 text-left">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#e5262c]/10 border border-[#e5262c]/20 text-[0.8rem] font-mono font-bold text-[#e5262c] w-fit">
               <span className="w-2 h-2 rounded-full bg-[#e5262c] animate-pulse" />
-              B.Tech in AI(DS); · MIT CSN 2026
+              B.Tech in AI(DS)· MIT CSN 2026
             </div>
 
             <p className="text-[1.08rem] text-foreground/85 leading-[1.8]">
