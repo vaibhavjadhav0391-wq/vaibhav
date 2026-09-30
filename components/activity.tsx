@@ -1,7 +1,7 @@
-"use client"
+﻿"use client"
 
 import { useEffect, useState, useMemo } from "react"
-import { Flame, GitCommit, Code2, ExternalLink, Trophy } from "lucide-react"
+import { Flame, GitCommit, Code2, ExternalLink, Trophy, RefreshCw } from "lucide-react"
 
 interface ContributionDay {
   date: string
@@ -18,7 +18,7 @@ interface LeetCodeStats {
   submissionCalendar: Record<string, number>
 }
 
-// Initial high-fidelity cached activity for instant, zero-delay rendering
+// Initial high-fidelity cached activity for instant, zero-delay rendering with recent 2026 activity
 const INITIAL_LEETCODE_CALENDAR: Record<string, number> = {
   "1783468800": 14, "1783555200": 3, "1783641600": 3, "1783728000": 2, "1783814400": 2,
   "1783900800": 2, "1783987200": 2, "1784073600": 1, "1784160000": 1, "1784246400": 2,
@@ -35,30 +35,33 @@ const INITIAL_LEETCODE_CALENDAR: Record<string, number> = {
   "1788739200": 1, "1788825600": 1, "1788912000": 1, "1788998400": 1, "1789084800": 1,
   "1789171200": 1, "1789257600": 1, "1789344000": 1, "1789430400": 1, "1789516800": 3,
   "1789603200": 2, "1789689600": 1, "1789862400": 1, "1789948800": 1, "1790035200": 2,
-  "1790121600": 1, "1790208000": 1, "1790294400": 1
+  "1790121600": 1, "1790208000": 1, "1790294400": 1, "1790380800": 1, "1790467200": 2,
+  "1790553600": 1, "1790640000": 1, "1790726400": 1
 }
 
 export function Activity() {
   const [ghContributions, setGhContributions] = useState<ContributionDay[]>([])
-  const [totalGhContributions, setTotalGhContributions] = useState<number>(293)
+  const [totalGhContributions, setTotalGhContributions] = useState<number>(322)
   const [loadingGh, setLoadingGh] = useState<boolean>(true)
 
   const [lcStats, setLcStats] = useState<LeetCodeStats>({
-    totalSolved: 95,
+    totalSolved: 99,
     easySolved: 51,
-    mediumSolved: 39,
-    hardSolved: 5,
-    ranking: 1750404,
+    mediumSolved: 42,
+    hardSolved: 6,
+    ranking: 1727531,
     submissionCalendar: INITIAL_LEETCODE_CALENDAR,
   })
-  const [loadingLc, setLoadingLc] = useState<boolean>(false)
+  const [loadingLc, setLoadingLc] = useState<boolean>(true)
   const [activeTooltip, setActiveTooltip] = useState<{ text: string; x: number; y: number } | null>(null)
 
   // Fetch live GitHub contributions
   useEffect(() => {
     async function fetchGithub() {
       try {
-        const res = await fetch("https://github-contributions-api.jogruber.de/v4/vaibhavjadhav0391-wq?y=last")
+        const res = await fetch("https://github-contributions-api.jogruber.de/v4/vaibhavjadhav0391-wq?y=last", {
+          cache: "no-store",
+        })
         if (res.ok) {
           const data = await res.json()
           if (data.contributions && Array.isArray(data.contributions)) {
@@ -77,27 +80,93 @@ export function Activity() {
     fetchGithub()
   }, [])
 
-  // Fetch live LeetCode stats
+  // Fetch live LeetCode stats via Next.js internal API route with multi-mirror client fallback
   useEffect(() => {
     async function fetchLeetCode() {
+      setLoadingLc(true)
+
+      // Step 1: Query internal API route (direct official LeetCode GraphQL with automatic server caching)
       try {
-        const res = await fetch("https://alfa-leetcode-api.onrender.com/userProfile/vaibhav032526")
+        const res = await fetch("/api/leetcode", { cache: "no-store" })
         if (res.ok) {
           const data = await res.json()
+          if (data && (data.totalSolved || data.submissionCalendar)) {
+            setLcStats({
+              totalSolved: data.totalSolved ?? 99,
+              easySolved: data.easySolved ?? 51,
+              mediumSolved: data.mediumSolved ?? 42,
+              hardSolved: data.hardSolved ?? 6,
+              ranking: data.ranking ?? 1727531,
+              submissionCalendar: data.submissionCalendar || INITIAL_LEETCODE_CALENDAR,
+            })
+            setLoadingLc(false)
+            return
+          }
+        }
+      } catch (err) {
+        console.warn("Internal /api/leetcode endpoint skipped, attempting client mirrors:", err)
+      }
+
+      // Step 2: High-speed Vercel mirror fallback
+      try {
+        const res = await fetch("https://leetcode-api-faisalshohag.vercel.app/vaibhav032526")
+        if (res.ok) {
+          const data = await res.json()
+          const statsList: Array<{ difficulty: string; count: number }> = data?.matchedUserStats?.acSubmissionNum || []
+          const total = data.totalSolved || statsList.find((s) => s.difficulty === "All")?.count || 99
+          const easy = data.easySolved ?? statsList.find((s) => s.difficulty === "Easy")?.count ?? 51
+          const medium = data.mediumSolved ?? statsList.find((s) => s.difficulty === "Medium")?.count ?? 42
+          const hard = data.hardSolved ?? statsList.find((s) => s.difficulty === "Hard")?.count ?? 6
+          const ranking = data.ranking ?? 1727531
+
           let calendar = data.submissionCalendar
           if (typeof calendar === "string") {
             try {
               calendar = JSON.parse(calendar)
             } catch {}
           }
-          setLcStats((prev) => ({
-            totalSolved: (data.easySolved || 0) + (data.mediumSolved || 0) + (data.hardSolved || 0) || prev.totalSolved,
-            easySolved: data.easySolved ?? prev.easySolved,
-            mediumSolved: data.mediumSolved ?? prev.mediumSolved,
-            hardSolved: data.hardSolved ?? prev.hardSolved,
-            ranking: data.ranking ?? prev.ranking,
-            submissionCalendar: calendar && typeof calendar === "object" ? calendar : prev.submissionCalendar,
-          }))
+
+          setLcStats({
+            totalSolved: total,
+            easySolved: easy,
+            mediumSolved: medium,
+            hardSolved: hard,
+            ranking: ranking,
+            submissionCalendar: calendar && typeof calendar === "object" ? calendar : INITIAL_LEETCODE_CALENDAR,
+          })
+          setLoadingLc(false)
+          return
+        }
+      } catch (err) {
+        console.warn("Vercel mirror fallback skipped:", err)
+      }
+
+      // Step 3: Alfa LeetCode Render mirror fallback
+      try {
+        const res = await fetch("https://alfa-leetcode-api.onrender.com/userProfile/vaibhav032526")
+        if (res.ok) {
+          const data = await res.json()
+          const statsList: Array<{ difficulty: string; count: number }> = data?.matchedUserStats?.acSubmissionNum || []
+          const total = data.totalSolved || statsList.find((s) => s.difficulty === "All")?.count || 99
+          const easy = data.easySolved ?? statsList.find((s) => s.difficulty === "Easy")?.count ?? 51
+          const medium = data.mediumSolved ?? statsList.find((s) => s.difficulty === "Medium")?.count ?? 42
+          const hard = data.hardSolved ?? statsList.find((s) => s.difficulty === "Hard")?.count ?? 6
+
+          let calendar = data.submissionCalendar
+          if (typeof calendar === "string") {
+            try {
+              calendar = JSON.parse(calendar)
+            } catch {}
+          }
+
+          setLcStats({
+            totalSolved: total,
+            easySolved: easy,
+            mediumSolved: medium,
+            hardSolved: hard,
+            ranking: data.ranking ?? 1727531,
+            submissionCalendar: calendar && typeof calendar === "object" ? calendar : INITIAL_LEETCODE_CALENDAR,
+          })
         }
       } catch (err) {
         console.warn("Using cached LeetCode stats:", err)
@@ -105,6 +174,7 @@ export function Activity() {
         setLoadingLc(false)
       }
     }
+
     fetchLeetCode()
   }, [])
 
@@ -124,9 +194,9 @@ export function Activity() {
     return cols.slice(-26)
   }, [ghContributions])
 
-  // Build LeetCode heatmap grid from timestamps
+  // Build LeetCode heatmap grid from timestamps (supports timezone mapping)
   const lcWeeks = useMemo(() => {
-    // 1. Build timestamp -> date string map (UTC based)
+    // 1. Build date string map from UTC timestamps
     const dateMap: Record<string, number> = {}
     let calendar = lcStats.submissionCalendar
     if (typeof calendar === "string") {
@@ -140,21 +210,33 @@ export function Activity() {
         const ts = parseInt(tsStr, 10)
         if (!isNaN(ts)) {
           const d = new Date(ts * 1000)
-          const dateKey = d.toISOString().split("T")[0]
-          dateMap[dateKey] = (dateMap[dateKey] || 0) + Number(count)
+          const utcKey = d.toISOString().split("T")[0]
+          const localYear = d.getFullYear()
+          const localMonth = String(d.getMonth() + 1).padStart(2, "0")
+          const localDay = String(d.getDate()).padStart(2, "0")
+          const localKey = `${localYear}-${localMonth}-${localDay}`
+
+          const c = Number(count)
+          dateMap[utcKey] = Math.max(dateMap[utcKey] || 0, c)
+          dateMap[localKey] = Math.max(dateMap[localKey] || 0, c)
         }
       })
     }
 
-    // 2. Generate the last 182 days (26 weeks)
+    // 2. Generate the last 182 days (26 weeks) up to today
     const days: ContributionDay[] = []
     const today = new Date()
 
     for (let i = 181; i >= 0; i--) {
       const d = new Date(today)
       d.setDate(d.getDate() - i)
-      const dateStr = d.toISOString().split("T")[0]
-      const count = dateMap[dateStr] || 0
+      const year = d.getFullYear()
+      const month = String(d.getMonth() + 1).padStart(2, "0")
+      const dayNum = String(d.getDate()).padStart(2, "0")
+      const dateStr = `${year}-${month}-${dayNum}`
+      const utcStr = d.toISOString().split("T")[0]
+
+      const count = dateMap[dateStr] || dateMap[utcStr] || 0
 
       let level = 0
       if (count >= 5) level = 4
@@ -212,7 +294,7 @@ export function Activity() {
   return (
     <section id="activity" className="py-24 relative overflow-hidden bg-transparent">
       <div className="container mx-auto px-[max(4vw,1.5rem)] max-w-[1200px]">
-        {/* Section Header with 100% Solid Black / Theme-Aware Color */}
+        {/* Section Header */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-12 gap-4">
           <div>
             <div className="flex items-center gap-2 text-xs font-mono tracking-widest text-[#e5262c] uppercase font-bold mb-2">
@@ -260,28 +342,34 @@ export function Activity() {
                   href="https://github.com/vaibhavjadhav0391-wq"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-xs font-mono font-bold px-4 py-2 rounded-full bg-white/10 hover:bg-[#e5262c] text-white hover:text-white border border-white/15 transition-all shadow-sm"
+                  className="flex items-center gap-2 text-xs font-mono font-bold px-4 py-2 rounded-full bg-white/10 hover:bg-white text-white hover:text-[#121215] border border-white/15 transition-all shadow-sm"
                 >
                   <span>Profile</span>
                   <ExternalLink size={13} />
                 </a>
               </div>
 
-              {/* Total Contributions Metric */}
-              <div className="flex items-baseline gap-2.5 mb-6">
-                <span className="text-4xl sm:text-5xl font-bold font-serif text-white tracking-tight">
-                  {totalGhContributions}
-                </span>
-                <span className="text-xs sm:text-sm text-neutral-300 font-mono font-medium">
-                  contributions in the last year
-                </span>
+              {/* Total Contributions */}
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <span className="text-4xl sm:text-5xl font-bold font-serif text-white tracking-tight">
+                    {totalGhContributions}
+                  </span>
+                  <span className="block text-xs sm:text-sm text-neutral-300 font-mono font-medium mt-1">
+                    Contributions in the last year
+                  </span>
+                </div>
+                <div className="px-4 py-2 rounded-full border border-emerald-500/40 bg-emerald-500/15 text-emerald-300 text-xs font-mono font-bold flex items-center gap-2 shadow-sm">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                  <span>Live Sync</span>
+                </div>
               </div>
 
-              {/* Heatmap Grid View - Full Width, No Horizontal Scroll */}
+              {/* GitHub Heatmap Grid View */}
               <div className="w-full pb-3 pt-1">
                 {loadingGh && ghWeeks.length === 0 ? (
-                  <div className="h-28 flex items-center justify-center text-xs font-mono text-neutral-400">
-                    Syncing live GitHub timeline...
+                  <div className="h-[96px] flex items-center justify-center text-xs font-mono text-neutral-400">
+                    Loading GitHub heatmap...
                   </div>
                 ) : (
                   <div className="flex justify-between gap-[3px] sm:gap-[4px] w-full">
@@ -296,7 +384,7 @@ export function Activity() {
                             onMouseEnter={(e) => {
                               const rect = e.currentTarget.getBoundingClientRect()
                               setActiveTooltip({
-                                text: `${day.count} contribution${day.count === 1 ? "" : "s"} on ${day.date}`,
+                                text: `${day.count} GitHub contribution${day.count === 1 ? "" : "s"} on ${day.date}`,
                                 x: rect.left + rect.width / 2,
                                 y: rect.top - 10,
                               })
@@ -373,7 +461,7 @@ export function Activity() {
                 </div>
               </div>
 
-              {/* LeetCode Heatmap Grid View - Full Width, Glowing Active Submissions */}
+              {/* LeetCode Heatmap Grid View - Full Width */}
               <div className="w-full pb-3 pt-1">
                 <div className="flex justify-between gap-[3px] sm:gap-[4px] w-full">
                   {lcWeeks.map((week, wIdx) => (
